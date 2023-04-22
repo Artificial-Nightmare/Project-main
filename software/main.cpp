@@ -20,7 +20,6 @@ int main()
         for (int j = 0; j < X.size(); j++) {
             std::vector<double> x = X[j];
             int y = Y[j];
-
             // Add a 1 to the start of the input vector for the intercept on ne passe pas forcément a l'origine
             x.insert(x.begin(), 1.0);
             if (y * std::inner_product(x.begin(), x.end(), w.begin(), 0.0) <= 0) {
