@@ -2,15 +2,7 @@
 #include <vector>
 #include <numeric>
 
-
-/*
-3 fonctions pour faire une classification linéaire :
- - 
- -
- -
-*/
-
-
+// cf Discord pour voir interractions avec DLL
 
 int main()
 {
