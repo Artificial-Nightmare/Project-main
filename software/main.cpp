@@ -1,8 +1,15 @@
 #include <iostream>
 #include <vector>
-#include <cmath>
-#include <algorithm>
 #include <numeric>
+
+
+/*
+3 fonctions pour faire une classification linéaire :
+ - 
+ -
+ -
+*/
+
 
 
 int main()
