@@ -1,12 +1,15 @@
-#include <iostream>
-#include <vector>
-#include <cmath>
-#include <algorithm>
 #include <numeric>
 #include <fstream>
+#include <vector>
 
-// Fonction de classification linéaire (algorithme de Rosenblatt)
-std::vector<double> linear_classification(std::vector<std::vector<double>> X, std::vector<int> Y, double learning_rate, int max_iterations, std::string filename)
+#ifdef _WIN32
+#define EXPORT __declspec(dllexport)
+#else
+#define EXPORT
+#endif
+
+extern "C" {
+EXPORT std::vector<double> linear_classification(std::vector<std::vector<double>> X, std::vector<int> Y, double learning_rate, int max_iterations, std::string filename)
 {
     std::vector<double> w(X[0].size()+1, 0); // Ajout de 1 pour l'intercept {w0, w1, w2}
     std::ofstream outFile(filename);
@@ -31,20 +34,4 @@ std::vector<double> linear_classification(std::vector<std::vector<double>> X, st
 
     return w;
 }
-
-int main()
-{
-    // Données d'entraînement
-    std::vector<std::vector<double>> X = {{1, 1}, {2, 3}, {3, 3}};
-    std::vector<int> Y = {1, -1, -1};
-
-    // Paramètres de l'algorithme
-    double learning_rate = 0.1;
-    int max_iterations = 10;
-    std::string filename = "data.txt";
-
-    // Exécution de la classification linéaire et enregistrement des résultats
-    std::vector<double> w = linear_classification(X, Y, learning_rate, max_iterations, filename);
-
-    return 0;
 }
