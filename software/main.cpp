@@ -1,6 +1,8 @@
+#include <vector>
+#include <cmath>
+#include <algorithm>
 #include <numeric>
 #include <fstream>
-#include <vector>
 
 #ifdef _WIN32
 #define EXPORT __declspec(dllexport)
