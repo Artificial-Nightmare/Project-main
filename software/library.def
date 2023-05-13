@@ -1,0 +1,3 @@
+LIBRARY "my_project"
+EXPORTS
+        linear_classification
