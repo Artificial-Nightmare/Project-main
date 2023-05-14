@@ -1,3 +1,0 @@
-C:/PA/Project-main/lib/CMakeFiles/software.dir
-C:/PA/Project-main/lib/CMakeFiles/edit_cache.dir
-C:/PA/Project-main/lib/CMakeFiles/rebuild_cache.dir
