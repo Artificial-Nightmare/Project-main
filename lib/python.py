@@ -8,35 +8,42 @@ import sys
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
 # Append the path to the DLL to the system's search path
-dll_path = os.path.join(current_dir, 'LinearCLassification')
+dll_path = os.path.join(current_dir, 'liblinear_classification.dll')
 sys.path.append(dll_path)
 
 # Load the DLL
 dll = ctypes.CDLL(dll_path)
 
-# Définition des types de données d'entrée et de sortie de la fonction
-dll.linear_classification.argtypes = [ctypes.POINTER(ctypes.POINTER(ctypes.c_double)), ctypes.POINTER(ctypes.c_int), ctypes.c_double, ctypes.c_int]
-dll.linear_classification.restype = ctypes.POINTER(ctypes.c_double)
+# Define the input and output data types of the function
+dll.linear_classification.argtypes = [ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_int), ctypes.c_int, ctypes.c_int, ctypes.c_double, ctypes.c_int, ctypes.POINTER(ctypes.c_double)]
+dll.linear_classification.restype = None
 
-# Préparation des données
+# Prepare the data
 X = [[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]]
 Y = [1, -1, 1]
-X_array = (ctypes.POINTER(ctypes.c_double) * len(X))(*[ctypes.cast((ctypes.POINTER(ctypes.c_double) * len(x))(*[ctypes.pointer(ctypes.c_double(i)) for i in x]), ctypes.POINTER(ctypes.c_double)) for x in X])
+
+# Flatten the input data
+X_flat = [val for sublist in X for val in sublist]
+
+# Define the data types of the input arrays
+X_array = (ctypes.c_double * len(X_flat))(*X_flat)
 Y_array = (ctypes.c_int * len(Y))(*Y)
-learning_rate = 0.01
-max_iterations = 1000
 
+learning_rate = ctypes.c_double(0.01)
+max_iterations = ctypes.c_int(1000)
 
-# Appel de la fonction
-resultat = dll.linear_classification(X_array, Y_array, learning_rate, max_iterations)
+# Create a buffer for the output data
+w = (ctypes.c_double * (len(X[0]) + 1))()
 
-# Conversion des résultats en un tableau Python
-resultat = ctypes.cast(resultat, ctypes.POINTER(ctypes.c_double * (len(X[0]) + 1)))
-resultat = list(resultat.contents)
+# Call the function
+dll.linear_classification(X_array, Y_array, len(X), len(X[0]), learning_rate, max_iterations, w)
 
-# Affichage de la classification
+# Convert the results to a Python list
+w_list = list(w)
+
+# Plot the classification
 plt.scatter(np.array(X)[:, 0], np.array(X)[:, 1], c=np.array(Y))
 x = np.linspace(0, 10, 100)
-y = (-resultat[0] - resultat[1] * x) / resultat[2]
+y = (-w_list[0] - w_list[1] * x) / w_list[2]
 plt.plot(x, y)
 plt.show()
