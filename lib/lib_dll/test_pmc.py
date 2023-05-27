@@ -2,7 +2,6 @@ import ctypes
 import numpy as np
 import os
 import sys
-import matplotlib.pyplot as plt
 
 # Get the directory of the current script
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -12,31 +11,40 @@ dll_path = os.path.join(current_dir, 'perceptron_multi_couche.dll')
 sys.path.append(dll_path)
 
 # Load the DLL
-mlp_dll = ctypes.CDLL(dll_path)
+mymlp = ctypes.cdll.LoadLibrary(dll_path)
 
-# Define the data types for the functions in the DLL
-mlp_dll.train.argtypes = [ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double), ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_bool, ctypes.c_int, ctypes.c_double]
-mlp_dll.predict.argtypes = [ctypes.POINTER(ctypes.c_double), ctypes.c_int, ctypes.c_bool, ctypes.POINTER(ctypes.c_double), ctypes.c_int]
+# Define the input and output types of the functions in the DLL
 
-# Define the input and output data
-samples_inputs = np.array([0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0], dtype=np.float64)
-samples_expected_outputs = np.array([0.0, 1.0, 1.0, 0.0], dtype=np.float64)
-inputs = np.array([[0, 0], [0, 1], [1, 0], [1, 1]], dtype=np.float64)
-outputs = np.zeros((4,), dtype=np.float64)
+mymlp.MyMLP_train.restype = None
+mymlp.MyMLP_train.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double), ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_bool, ctypes.c_int, ctypes.c_double]
+mymlp.MyMLP_predict.restype = None
+mymlp.MyMLP_predict.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_double), ctypes.c_int, ctypes.c_bool, ctypes.POINTER(ctypes.c_double), ctypes.c_int]
+mymlp.MyMLP_destroy.restype = None
+mymlp.MyMLP_destroy.argtypes = [ctypes.c_void_p]
+
+# Define the input-output pairs to train the MLP
+samples_inputs = np.array([[0, 0], [0, 1], [1, 0], [1, 1]], dtype=np.double)
+samples_expected_outputs = np.array([[0], [1], [1], [0]], dtype=np.double)
+samples_size = samples_inputs.shape[0]
+inputs_size = samples_inputs.shape[1]
+outputs_size = samples_expected_outputs.shape[1]
+
+# Create an instance of the MyMLP class
+npl = [2, 4, 1]
+mymlp_instance = mymlp.MyMLP_create(ctypes.c_void_p, ctypes.c_int * len(npl)(*npl))
 
 # Train the MLP
-samples_size = 4
-inputs_size = 2
-outputs_size = 1
 iteration_count = 10000
 alpha = 0.1
 is_classification = True
-mlp_dll.train(samples_inputs.ctypes.data_as(ctypes.POINTER(ctypes.c_double)), samples_expected_outputs.ctypes.data_as(ctypes.POINTER(ctypes.c_double)), samples_size, inputs_size, outputs_size, is_classification, iteration_count, alpha)
+mymlp.MyMLP_train(mymlp_instance, samples_inputs.ctypes.data_as(ctypes.POINTER(ctypes.c_double)), samples_expected_outputs.ctypes.data_as(ctypes.POINTER(ctypes.c_double)), samples_size, inputs_size, outputs_size, is_classification, iteration_count, alpha)
 
-# Predict the outputs
+# Test the MLP
 for i in range(4):
-    mlp_dll.predict(inputs[i].ctypes.data_as(ctypes.POINTER(ctypes.c_double)), inputs_size, is_classification, outputs[i].ctypes.data_as(ctypes.POINTER(ctypes.c_double)), outputs_size)
+    inputs = np.array([samples_inputs[i]], dtype=np.double)
+    output = np.zeros((1,), dtype=np.double)
+    mymlp.MyMLP_predict(mymlp_instance, inputs.ctypes.data_as(ctypes.POINTER(ctypes.c_double)), inputs_size, is_classification, output.ctypes.data_as(ctypes.POINTER(ctypes.c_double)), outputs_size)
+    print(f"inputs: {inputs.flatten()} -> output: {output[0]}")
 
-# Print the outputs
-print("Inputs: {}".format(inputs))
-print("Outputs: {}".format(outputs))
+# Free the memory used by the MyMLP instance
+mymlp.MyMLP_destroy(mymlp_instance)
