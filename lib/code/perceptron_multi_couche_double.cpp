@@ -1,4 +1,3 @@
-#include "MyMLP.h"
 #include <iostream>
 #include <cmath>
 #include <random>
@@ -7,8 +6,10 @@
 #include <ctype.h>
 #include <vector>
 
-extern "C" {
 using namespace std;
+
+extern "C" {
+
 class MyMLP {
 public:
     MyMLP(vector<int> npl) : d(npl), L(npl.size() - 1) {
@@ -62,70 +63,69 @@ public:
         }
     }
 
-void predict(double* inputs, int inputs_size, bool is_classification, double* output, int outputs_size) {
-    vector<double> inputs_vec(inputs, inputs + inputs_size);
-    vector<double> output_vec;
+    void predict(double* inputs, int inputs_size, bool is_classification, double* output, int outputs_size) {
+        vector<double> inputs_vec(inputs, inputs + inputs_size);
+        vector<double> output_vec;
 
-    propagate(inputs_vec, is_classification);
-    output_vec.resize(d[L]);
-    for (int j = 1; j <= d[L]; ++j) {
-        output_vec[j-1] = X[L][j];
+        propagate(inputs_vec, is_classification);
+        output_vec.resize(d[L]);
+        for (int j = 1; j <= d[L]; ++j) {
+            output_vec[j-1] = X[L][j];
+        }
+
+        for (int i = 0; i < outputs_size; ++i) {
+            output[i] = output_vec[i];
+        }
     }
-
-    for (int i = 0; i < outputs_size; ++i) {
-        output[i] = output_vec[i];
-    }
-}
-
 
     void train(double* samples_inputs, double* samples_expected_outputs,
-           int samples_size, int inputs_size, int outputs_size,
-           bool is_classification, int iteration_count, double alpha) {
-    vector<vector<double>> all_samples_inputs(samples_size, vector<double>(inputs_size));
-    vector<vector<double>> all_samples_expected_outputs(samples_size, vector<double>(outputs_size));
+               int samples_size, int inputs_size, int outputs_size,
+               bool is_classification, int iteration_count, double alpha) {
+        vector<vector<double>> all_samples_inputs(samples_size, vector<double>(inputs_size));
+        vector<vector<double>> all_samples_expected_outputs(samples_size, vector<double>(outputs_size));
 
-    for (int i = 0; i < samples_size; ++i) {
-        for (int j = 0; j < inputs_size; ++j) {
-            all_samples_inputs[i][j] = samples_inputs[i*inputs_size + j];
-        }
-        for (int j = 0; j < outputs_size; ++j) {
-            all_samples_expected_outputs[i][j] = samples_expected_outputs[i*outputs_size + j];
-        }
-    }
-
-    random_device rd;
-    mt19937 gen(rd());
-    uniform_int_distribution<int> dis(0, samples_size - 1);
-    for (int it = 0; it < iteration_count; ++it) {
-        int k = dis(gen);
-        vector<double> inputs_k = all_samples_inputs[k];
-        vector<double> y_k = all_samples_expected_outputs[k];
-
-        propagate(inputs_k, is_classification);
-        for (int j = 1; j <= d[L]; ++j) {
-            deltas[L][j] = X[L][j] - y_k[j - 1];
-            if (is_classification) {
-                deltas[L][j] *= (1.0 - X[L][j] * X[L][j]);
+        for (int i = 0; i < samples_size; ++i) {
+            for (int j = 0; j < inputs_size; ++j) {
+                all_samples_inputs[i][j] = samples_inputs[i*inputs_size + j];
+            }
+            for (int j = 0; j < outputs_size; ++j) {
+                all_samples_expected_outputs[i][j] = samples_expected_outputs[i*outputs_size + j];
             }
         }
-        for (int l = L - 1; l >= 1; --l) {
-            for (int i = 1; i <= d[l-1]; ++i) {
-                double total = 0.0;
-                for (int j = 1; j <= d[l]; ++j) {
-                    total += W[l+1][i][j] * deltas[l+1][j];
-                }
-                deltas[l][i] = (1.0 - X[l][i] * X[l][i]) * total;
-            }
-        }
-        for (int l = 1; l <= L; ++l) {
-            for (int i = 0; i <= d[l-1]; ++i) {
-                for (int j = 1; j <= d[l]; ++j) {
-                    W[l][i][j] -= alpha * X[l-1][i] * deltas[l][j];
+
+        random_device rd;
+        mt19937 gen(rd());
+        uniform_int_distribution<int> dis(0, samples_size - 1);
+        for (int it = 0; it < iteration_count; ++it) {
+            int k = dis(gen);
+            vector<double> inputs_k = all_samples_inputs[k];
+            vector<double> y_k = all_samples_expected_outputs[k];
+
+            propagate(inputs_k, is_classification);
+            for (int j = 1; j <= d[L]; ++j) {
+                deltas[L][j] = X[L][j] - y_k[j - 1];
+                if (is_classification) {
+                    deltas[L][j] *= (1.0 - X[L][j] * X[L][j]);
                 }
             }
+            for (int l = L - 1; l >= 1; --l) {
+                for (int i = 1; i <= d[l-1]; ++i) {
+                    double total = 0.0;
+                    for (int j = 1; j <= d[l]; ++j) {
+                        total += W[l+1][i][j] * deltas[l+1][j];
+                    }
+                    deltas[l][i] = (1.0 - X[l][i] * X[l][i]) * total;
+                }
+            }
+            for (int l = 1; l <= L; ++l) {
+                for (int i = 0; i <= d[l-1]; ++i) {
+                    for (int j = 1; j <= d[l]; ++j) {
+                        W[l][i][j] -= alpha * X[l-1][i] * deltas[l][j];
+                    }
+                }
+            }
         }
     }
-}
 
 private:
     vector<int> d;
@@ -134,9 +134,11 @@ private:
     vector<vector<double>> X;
     vector<vector<double>> deltas;
 };
-/*
+
+} // extern "C"
+
 int main(int argc, char *argv[]) {
-    vector<int> npl = {2, 3, 1};
+    vector<int> npl = {2, 4, 1};
     MyMLP mlp(npl);
 
     double samples_inputs[] = {0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0};
@@ -169,8 +171,4 @@ int main(int argc, char *argv[]) {
     }
 
     return 0;
-}
-*/
-
-
 }
