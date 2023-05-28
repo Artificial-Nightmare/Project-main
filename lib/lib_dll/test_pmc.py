@@ -11,40 +11,36 @@ dll_path = os.path.join(current_dir, 'perceptron_multi_couche.dll')
 sys.path.append(dll_path)
 
 # Load the DLL
-mymlp = ctypes.cdll.LoadLibrary(dll_path)
+mlp_dll = ctypes.cdll.LoadLibrary(dll_path)
 
-# Define the input and output types of the functions in the DLL
+# Définition des types de données
+mlp_dll.createMLP.restype = ctypes.c_void_p
+mlp_dll.createMLP.argtypes = [ctypes.POINTER(ctypes.c_int), ctypes.c_int]
+mlp_dll.deleteMLP.argtypes = [ctypes.c_void_p]
+mlp_dll.predict.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_double), ctypes.c_int, ctypes.c_bool, ctypes.POINTER(ctypes.c_double), ctypes.c_int]
+mlp_dll.train.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double), ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_bool, ctypes.c_int, ctypes.c_double]
 
-mymlp.MyMLP_train.restype = None
-mymlp.MyMLP_train.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double), ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_bool, ctypes.c_int, ctypes.c_double]
-mymlp.MyMLP_predict.restype = None
-mymlp.MyMLP_predict.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_double), ctypes.c_int, ctypes.c_bool, ctypes.POINTER(ctypes.c_double), ctypes.c_int]
-mymlp.MyMLP_destroy.restype = None
-mymlp.MyMLP_destroy.argtypes = [ctypes.c_void_p]
+# Création du MLP avec 2 entrées, 2 neurones cachés et 1 sortie
+npl = np.array([2, 8, 1], dtype=np.int32)
+mlp_ptr = mlp_dll.createMLP(npl.ctypes.data_as(ctypes.POINTER(ctypes.c_int)), npl.size)
 
-# Define the input-output pairs to train the MLP
+# Entraînement du MLP sur le XOR
 samples_inputs = np.array([[0, 0], [0, 1], [1, 0], [1, 1]], dtype=np.double)
 samples_expected_outputs = np.array([[0], [1], [1], [0]], dtype=np.double)
-samples_size = samples_inputs.shape[0]
-inputs_size = samples_inputs.shape[1]
-outputs_size = samples_expected_outputs.shape[1]
+mlp_dll.train(mlp_ptr,
+               samples_inputs.ctypes.data_as(ctypes.POINTER(ctypes.c_double)),
+               samples_expected_outputs.ctypes.data_as(ctypes.POINTER(ctypes.c_double)),
+               samples_inputs.shape[0], samples_inputs.shape[1], samples_expected_outputs.shape[1],
+               True, 20000, 0.1)
 
-# Create an instance of the MyMLP class
-npl = [2, 4, 1]
-mymlp_instance = mymlp.MyMLP_create(ctypes.c_void_p, ctypes.c_int * len(npl)(*npl))
+# Test du MLP sur le XOR
+input = np.zeros(2, dtype=np.double)
+output = np.zeros(1, dtype=np.double)
+for i in range(samples_inputs.shape[0]):
+    input[0] = samples_inputs[i, 0]
+    input[1] = samples_inputs[i, 1]
+    mlp_dll.predict(mlp_ptr, input.ctypes.data_as(ctypes.POINTER(ctypes.c_double)), input.size, True, output.ctypes.data_as(ctypes.POINTER(ctypes.c_double)), output.size)
+    print(f"{input[0]} XOR {input[1]} = {output[0]}")
 
-# Train the MLP
-iteration_count = 10000
-alpha = 0.1
-is_classification = True
-mymlp.MyMLP_train(mymlp_instance, samples_inputs.ctypes.data_as(ctypes.POINTER(ctypes.c_double)), samples_expected_outputs.ctypes.data_as(ctypes.POINTER(ctypes.c_double)), samples_size, inputs_size, outputs_size, is_classification, iteration_count, alpha)
-
-# Test the MLP
-for i in range(4):
-    inputs = np.array([samples_inputs[i]], dtype=np.double)
-    output = np.zeros((1,), dtype=np.double)
-    mymlp.MyMLP_predict(mymlp_instance, inputs.ctypes.data_as(ctypes.POINTER(ctypes.c_double)), inputs_size, is_classification, output.ctypes.data_as(ctypes.POINTER(ctypes.c_double)), outputs_size)
-    print(f"inputs: {inputs.flatten()} -> output: {output[0]}")
-
-# Free the memory used by the MyMLP instance
-mymlp.MyMLP_destroy(mymlp_instance)
+# Suppression du MLP
+mlp_dll.deleteMLP(mlp_ptr)
