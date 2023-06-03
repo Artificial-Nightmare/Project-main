@@ -20,9 +20,17 @@ dll.rosenblatt.argtypes = [np.ctypeslib.ndpointer(dtype=np.double, ndim=2, flags
 
 # Exemple d'utilisation
 # pas oublier de mettre le dtype=np.float64 !
-X = np.concatenate([np.random.random((50,2)) * 0.9 + np.array([1, 1]), np.random.random((50,2)) * 0.9 + np.array([2, 2])],dtype=np.float64)
-Y = np.concatenate([np.ones((50, 1)), np.ones((50, 1)) * -1.0],dtype=np.float64).flatten()
-learning_rate = 0.001
+X = np.array([
+      [1, 1],
+      [2, 3],
+      [3, 3]
+], dtype=np.float64)
+Y = np.array([
+      1,
+      -1,
+      -1
+], dtype=np.float64).flatten()
+learning_rate = 0.1
 max_iterations = 1000
 # Centrage et réduction des données
 X = (X - np.mean(X, axis=0)) / np.std(X, axis=0)
@@ -43,9 +51,9 @@ for i in range(len(X)):
             plt.scatter(X[i, 0], X[i, 1], color='blue')
       else:
             plt.scatter(X[i, 0], X[i, 1], color='red')
-      x = np.linspace(-5, 4, 100)        
-      y = (w[0] * X + w[2]) / w[1]
-      print("X",X,'\n',"Y", y)
+x = np.linspace(-5, 4, 100)        
+y = (w[0] * x + w[2]) / w[1]
+print("X",X,'\n',"Y", y)
 print("le poids !",w[0], w[1], w[2])
 plt.plot(x, y, 'k-')
 plt.show()

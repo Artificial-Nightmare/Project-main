@@ -19,8 +19,7 @@ void rosenblatt(double *X_data, double *Y_data, int rows, int cols, double learn
     }
 
     // Initialisation des poids à zéro c'est un vecteur de taille cols + 1 car on a ajouté le biais à X 
-    std::vector<double> w_vec(cols + 1, 0.0);
-
+    std::vector<double> w_vec(cols + 1, 0.0); // random ou 0 ?
     // Entraînement du perceptron pendant max_iterations itérations
     for (int i = 0; i < max_iterations; i++)
     {
@@ -45,29 +44,9 @@ void rosenblatt(double *X_data, double *Y_data, int rows, int cols, double learn
             break;
         }
         // Vérifier si la droite de séparation a le bon sens et inverser les poids si nécessaire
-        bool has_correct_orientation = true;
-        for (int j = 0; j < rows; j++)
-        {
-            double *x = &X[j * (cols + 1)];
-            double y = Y_data[j];
-            double dot_product = std::inner_product(x, x + cols + 1, w_vec.begin(), 0.0);
-            if (y * dot_product <= 0)
-            {
-                has_correct_orientation = false;
-                break;
-            }
-        }
-        // Inverser le signe des coefficients si nécessaire pour avoir la bonne orientation parfois ça fait n'importe quoi
-        if (!has_correct_orientation)
-        {
-            for (int k = 0; k <= cols; k++)
-            {
-                w_vec[k] *= -1;
-            }
-        }
     }
 
-    // Copier les poids entraînés dans le tableau de sortie w (pour Python) 
+    // les poids sortie w (pour Python) 
     for (int i = 0; i <= cols; i++)
     {
         w[i] = w_vec[i];

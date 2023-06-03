@@ -31,7 +31,7 @@ mlp_dll.train(mlp_ptr,
                samples_inputs.ctypes.data_as(ctypes.POINTER(ctypes.c_double)),
                samples_expected_outputs.ctypes.data_as(ctypes.POINTER(ctypes.c_double)),
                samples_inputs.shape[0], samples_inputs.shape[1], samples_expected_outputs.shape[1],
-               True, 20000, 0.1)
+               True, 10000, 0.1)
 
 # Test du MLP sur le XOR
 input = np.zeros(2, dtype=np.double)
