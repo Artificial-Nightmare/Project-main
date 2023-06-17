@@ -39,8 +39,13 @@ output = np.zeros(1, dtype=np.double)
 for i in range(samples_inputs.shape[0]):
     input[0] = samples_inputs[i, 0]
     input[1] = samples_inputs[i, 1]
-    mlp_dll.predict(mlp_ptr, input.ctypes.data_as(ctypes.POINTER(ctypes.c_double)), input.size, True, output.ctypes.data_as(ctypes.POINTER(ctypes.c_double)), output.size)
-    print(f"{input[0]} XOR {input[1]} = {output[0]}")
+    mlp_dll.predict(mlp_ptr, 
+                    input.ctypes.data_as(ctypes.POINTER(ctypes.c_double)), 
+                    input.size, 
+                    True, 
+                    output.ctypes.data_as(ctypes.POINTER(ctypes.c_double)), 
+                    output.size)
+    print(f"[{int(input[0])}, {int(input[1])}] = {output[0]}")
 
 # Suppression du MLP
 mlp_dll.deleteMLP(mlp_ptr)
