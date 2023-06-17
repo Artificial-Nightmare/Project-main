@@ -46,7 +46,7 @@ y = (screen_height - height) // 2
 root.geometry(f"{width}x{height}+{x}+{y}")
 # Création du bouton "Télécharger"
 download_button = tk.Button(root, text="Télécharger une image", command=download_image)
-download_button.pack(side="right", padx=10, pady=10)
+download_button.pack(side="top", padx=10, pady=10)
 
 # Affichage de la fenêtre
 root.mainloop()
