@@ -19,7 +19,11 @@ void rosenblatt(double *X_data, double *Y_data, int rows, int cols, double learn
     }
 
     // Initialisation des poids à zéro c'est un vecteur de taille cols + 1 car on a ajouté le biais à X 
-    std::vector<double> w_vec(cols + 1, 0.0); // random ou 0 ?
+    std::vector<double> w_vec(cols + 1);
+for (int i = 0; i <= cols; i++)
+{
+    w_vec[i] = rand() / double(RAND_MAX);
+} // random ou 0 ?
     // Entraînement du perceptron pendant max_iterations itérations
     for (int i = 0; i < max_iterations; i++)
     {

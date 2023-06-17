@@ -20,18 +20,10 @@ dll.rosenblatt.argtypes = [np.ctypeslib.ndpointer(dtype=np.double, ndim=2, flags
 
 # Exemple d'utilisation
 # pas oublier de mettre le dtype=np.float64 !
-X = np.array([
-      [1, 1],
-      [2, 3],
-      [3, 3]
-], dtype=np.float64)
-Y = np.array([
-      1,
-      -1,
-      -1
-], dtype=np.float64).flatten()
+X = np.concatenate([np.random.random((50,2)) * 1.1 + np.array([1, 1]), np.random.random((50,2)) * 1.1 + np.array([2, 2])], dtype=np.float64)
+Y = np.concatenate([np.ones((50, 1)), np.ones((50, 1)) * -1.0], dtype=np.float64).flatten()
 learning_rate = 0.1
-max_iterations = 1000
+max_iterations = 100
 # Centrage et réduction des données
 X = (X - np.mean(X, axis=0)) / np.std(X, axis=0)
 
@@ -44,17 +36,13 @@ dll.rosenblatt(X, Y, X.shape[0], X.shape[1], learning_rate, max_iterations, w)
 
 # Affichage des poids
 print(w)
-
 # Affichage des données
-for i in range(len(X)):
-      if Y[i] == 1:
-            plt.scatter(X[i, 0], X[i, 1], color='blue')
-      else:
-            plt.scatter(X[i, 0], X[i, 1], color='red')
-x = np.linspace(-5, 4, 100)        
-y = (w[0] * x + w[2]) / w[1]
-print("X",X,'\n',"Y", y)
-print("le poids !",w[0], w[1], w[2])
-plt.plot(x, y, 'k-')
+plt.scatter(X[0:50, 0], X[0:50, 1], color='blue')
+plt.scatter(X[50:100,0], X[50:100,1], color='red') 
+# Affichage de la droite de séparation
+x = np.linspace(-2, 2, 100)
+y = -(w[0] * x + w[2]) / w[1]
+plt.plot(x, y, color='black')
 plt.show()
-plt.clf()
+
+
