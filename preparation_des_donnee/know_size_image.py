@@ -23,7 +23,7 @@ files = os.listdir(source_dir)
 # Pour chaque fichier dans le dossier
 for file in files:
     # Vérification que le fichier est bien une image
-    if file.endswith(".png"):
+    if file.endswith(".jpg"):
         # Chemin complet du fichier
         image_path = os.path.join(source_dir, file)
         # Ouverture de l'image et affichage de sa taille en pixels
@@ -31,3 +31,5 @@ for file in files:
             print(f"La taille de l'image {file} est: {img.size}")
         # Fermeture de l'image en dehors du bloc "with"
         img.close()
+    else:
+        print(f"Le fichier {file} n'est pas une image.")
