@@ -4,7 +4,6 @@
 #include <cstdlib>
 #include <cstring>
 #include <ctype.h>
-#include <vector>
 
 using namespace std;
 
@@ -12,60 +11,61 @@ extern "C"
 {
     struct MLP
     {
-        vector<int> d;
+        int* d;
         int L;
-        vector<vector<vector<double>>> W;
-        vector<vector<double>> X;
-        vector<vector<double>> deltas;
+        double*** W;
+        double** X;
+        double** deltas;
     };
 
-   MLP* createMLP(int* npl, int npl_size)
-{
-    MLP* mlp = new MLP();
-    mlp->d = vector<int>(npl, npl + npl_size);
-    mlp->L = npl_size - 1;
-    mlp->W.resize(mlp->L + 1);
-    random_device rd;
-    mt19937 gen(rd());
-    uniform_real_distribution<double> dis(-1.0, 1.0);
-
-    for (int l = 1; l <= mlp->L; ++l)
+    MLP* createMLP(int* npl, int npl_size)
     {
-        mlp->W[l].resize(mlp->d[l - 1] + 1);
-        for (int i = 0; i <= mlp->d[l - 1]; ++i)
+        MLP* mlp = new MLP();
+        mlp->d = new int[npl_size];
+        memcpy(mlp->d, npl, npl_size * sizeof(int));
+        mlp->L = npl_size - 1;
+        mlp->W = new double**[mlp->L + 1];
+        random_device rd;
+        mt19937 gen(rd());
+        uniform_real_distribution<double> dis(-1.0, 1.0);
+
+        for (int l = 1; l <= mlp->L; ++l)
         {
-            mlp->W[l][i].resize(mlp->d[l] + 1);
-            for (int j = 1; j <= mlp->d[l]; ++j)
+            mlp->W[l] = new double*[mlp->d[l - 1] + 1];
+            for (int i = 0; i <= mlp->d[l - 1]; ++i)
             {
-                mlp->W[l][i][j] = (j == 0) ? 0.0 : dis(gen);
+                mlp->W[l][i] = new double[mlp->d[l] + 1];
+                for (int j = 1; j <= mlp->d[l]; ++j)
+                {
+                    mlp->W[l][i][j] = (j == 0) ? 0.0 : dis(gen);
+                }
             }
         }
-    }
 
-    mlp->X.resize(mlp->L + 1);
-    for (int l = 0; l <= mlp->L; ++l)
-    {
-        mlp->X[l].resize(mlp->d[l] + 1);
-        for (int j = 0; j <= mlp->d[l]; ++j)
+        mlp->X = new double*[mlp->L + 1];
+        for (int l = 0; l <= mlp->L; ++l)
         {
-            mlp->X[l][j] = (j == 0) ? 1.0 : 0.0;
+            mlp->X[l] = new double[mlp->d[l] + 1];
+            for (int j = 0; j <= mlp->d[l]; ++j)
+            {
+                mlp->X[l][j] = (j == 0) ? 1.0 : 0.0;
+            }
         }
-    }
 
-    mlp->deltas.resize(mlp->L + 1);
-    for (int l = 0; l <= mlp->L; ++l)
-    {
-        mlp->deltas[l].resize(mlp->d[l] + 1);
-        for (int j = 0; j <= mlp->d[l]; ++j)
+        mlp->deltas = new double*[mlp->L + 1];
+        for (int l = 0; l <= mlp->L; ++l)
         {
-            mlp->deltas[l][j] = 0.0;
+            mlp->deltas[l] = new double[mlp->d[l] + 1];
+            for (int j = 0; j <= mlp->d[l]; ++j)
+            {
+                mlp->deltas[l][j] = 0.0;
+            }
         }
+
+        return mlp;
     }
 
-    return mlp;
-}
-
-    void propagate(MLP* mlp, vector<double> inputs, bool is_classification)
+    void propagate(MLP* mlp, double* inputs, bool is_classification)
     {
         for (int j = 0; j < mlp->d[0]; ++j)
         {
@@ -91,19 +91,10 @@ extern "C"
 
     void predict(MLP* mlp, double *inputs, int inputs_size, bool is_classification, double *output, int outputs_size)
     {
-        vector<double> inputs_vec(inputs, inputs + inputs_size);
-        vector<double> output_vec;
-
-        propagate(mlp, inputs_vec, is_classification);
-        output_vec.resize(mlp->d[mlp->L]);
+        propagate(mlp, inputs, is_classification);
         for (int j = 1; j <= mlp->d[mlp->L]; ++j)
         {
-            output_vec[j - 1] = mlp->X[mlp->L][j];
-        }
-
-        for (int i = 0; i < outputs_size; ++i)
-        {
-            output[i] = output_vec[i];
+            output[j - 1] = mlp->X[mlp->L][j];
         }
     }
 
@@ -111,11 +102,13 @@ extern "C"
                int samples_size, int inputs_size, int outputs_size,
                bool is_classification, int iteration_count, double alpha)
     {
-        vector<vector<double>> all_samples_inputs(samples_size, vector<double>(inputs_size));
-        vector<vector<double>> all_samples_expected_outputs(samples_size, vector<double>(outputs_size));
+        double** all_samples_inputs = new double*[samples_size];
+        double** all_samples_expected_outputs = new double*[samples_size];
 
         for (int i = 0; i < samples_size; ++i)
         {
+            all_samples_inputs[i] = new double[inputs_size];
+            all_samples_expected_outputs[i] = new double[outputs_size];
             for (int j = 0; j < inputs_size; ++j)
             {
                 all_samples_inputs[i][j] = samples_inputs[i * inputs_size + j];
@@ -132,8 +125,8 @@ extern "C"
         for (int it = 0; it < iteration_count; ++it)
         {
             int k = dis(gen);
-            vector<double> inputs_k = all_samples_inputs[k];
-            vector<double> y_k = all_samples_expected_outputs[k];
+            double* inputs_k = all_samples_inputs[k];
+            double* y_k = all_samples_expected_outputs[k];
 
             propagate(mlp, inputs_k, is_classification);
             for (int j = 1; j <= mlp->d[mlp->L]; ++j)
@@ -167,11 +160,37 @@ extern "C"
                 }
             }
         }
+
+        for (int i = 0; i < samples_size; ++i)
+        {
+            delete[] all_samples_inputs[i];
+            delete[] all_samples_expected_outputs[i];
+        }
+        delete[] all_samples_inputs;
+        delete[] all_samples_expected_outputs;
     }
 
     void deleteMLP(MLP* mlp)
     {
+        for (int l = 1; l <= mlp->L; ++l)
+        {
+            for (int i = 0; i <= mlp->d[l - 1]; ++i)
+            {
+                delete[] mlp->W[l][i];
+            }
+            delete[] mlp->W[l];
+        }
+        delete[] mlp->W;
+
+        for (int l = 0; l <= mlp->L; ++l)
+        {
+            delete[] mlp->X[l];
+            delete[] mlp->deltas[l];
+        }
+        delete[] mlp->X;
+        delete[] mlp->deltas;
+
+        delete[] mlp->d;
         delete mlp;
     }
 }
-

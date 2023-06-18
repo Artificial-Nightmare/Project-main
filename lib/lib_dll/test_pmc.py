@@ -21,7 +21,7 @@ mlp_dll.predict.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_double), ct
 mlp_dll.train.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double), ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_bool, ctypes.c_int, ctypes.c_double]
 
 # Création du MLP avec 2 entrées, 2 neurones cachés et 1 sortie
-npl = np.array([2, 2, 1], dtype=np.int32)
+npl = np.array([2,70, 1], dtype=np.int32)
 mlp_ptr = mlp_dll.createMLP(npl.ctypes.data_as(ctypes.POINTER(ctypes.c_int)), npl.size)
 
 # Entraînement du MLP sur le XOR
