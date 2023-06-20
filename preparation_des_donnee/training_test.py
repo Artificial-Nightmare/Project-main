@@ -10,7 +10,6 @@ chemin = os.path.join(dirname,"..", "Test_image")
 create_listTest.allcolors(chemin)
 create_listTest.expected_image(chemin)
 
-
 # Get the directory of the current script
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -32,18 +31,20 @@ mlp_dll.train.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_double), ctyp
 
 letsgo = 5
 # Chargement des données d'entraînement et de test
-npl = np.array([1875, 936, 468, 234, 117, 3], dtype=np.int64)
+npl = np.array([1875, 468, 117, 3], dtype=np.int64)
 mlp_ptr = mlp_dll.createMLP(npl.ctypes.data_as(ctypes.POINTER(ctypes.c_int)), npl.size)
 data_dir = os.path.join(current_dir, '..', 'Test_image')
-train_inputs = create_listTest.allcolors(os.path.join(data_dir, '..', 'Train_image'))
-train_expected_outputs = create_listTest.expected_image(os.path.join(data_dir, '..', 'Train_image'))
-test_inputs = create_listTest.allcolors(os.path.join(data_dir, '..','Test_image'))
-test_expected_outputs = create_listTest.expected_image(os.path.join(data_dir, '..','Test_image'))
+train_inputs = np.array(create_listTest.allcolors(os.path.join(data_dir, '..', 'Train_image')))
+train_expected_outputs = np.array(create_listTest.expected_image(os.path.join(data_dir, '..', 'Train_image')))
+test_inputs = np.array(create_listTest.allcolors(os.path.join(data_dir, '..','Test_image')))
+test_expected_outputs = np.array(create_listTest.expected_image(os.path.join(data_dir, '..','Test_image')))
+print(train_inputs)
+print(train_expected_outputs)
 print(train_expected_outputs)
 if train_inputs is not None and train_expected_outputs is not None and test_inputs is not None and test_expected_outputs is not None:
             # Entraînement du MLP sur les données d'entraînement
-            num_iterations = 5000
-            learning_rate = 0.02
+            num_iterations = 1000
+            learning_rate = 0.0004
             print(f"Entraînement du MLP sur {num_iterations} itérations avec un taux d'apprentissage de {learning_rate}")
             for i in range(num_iterations):
                 mlp_dll.train(mlp_ptr,
