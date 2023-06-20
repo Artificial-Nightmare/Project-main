@@ -3,60 +3,12 @@ from PIL import Image
 import numpy as np
 import ctypes
 import sys
-
-def expected_image(directory):
-    expected = []
-    for filename in os.listdir(directory):
-        if filename.startswith("basketball_"):
-            expected.append(0)
-        elif filename.startswith("football_"):
-            expected.append(1)
-        elif filename.startswith("baseball_"):
-            expected.append(2)
-        else:
-            print(f"Le fichier {filename} n'a pas été étiqueté car son nom ne commence pas par basketball_, football_ ou baseball_.")
-    
-    # Convertir les étiquettes en one-hot encoding
-    num_classes = len(set(expected))
-    one_hot_expected = np.zeros((len(expected), num_classes))
-    for i, val in enumerate(expected):
-        one_hot_expected[i][val] = 1
-   
-    return np.array(one_hot_expected)
-
-
-
-
-
-
-def allcolors(directory):
-    all_pixels = []
-    for filename in os.listdir(directory):
-        if filename.endswith(".jpg"):
-            image_path = os.path.join(directory, filename)
-            image = Image.open(image_path)
-            if image.mode != 'RGB':
-                print(f"L'image {filename} n'est pas en format RGB (mode {image.mode})")
-                image = image.convert('RGB')
-            pixels = []
-            for pixel in image.getdata():
-                r, g, b = pixel
-                pixels.append((r, g, b))
-            all_pixels.append(pixels)
-    if all_pixels:
-        all_pixels = np.array(all_pixels)
-        all_pixels = (all_pixels - np.mean(all_pixels, axis=0)) / np.std(all_pixels, axis=0)
-        print(all_pixels)
-        return all_pixels
-    else:
-        print(f"Aucune image valide trouvée dans le dossier {directory}")
-
-
+import create_listTest
 
 dirname = os.path.abspath(os.path.dirname(__file__))
 chemin = os.path.join(dirname,"..", "Test_image")
-allcolors(chemin)
-expected_image(chemin)
+create_listTest.allcolors(chemin)
+create_listTest.expected_image(chemin)
 
 
 # Get the directory of the current script
@@ -83,10 +35,10 @@ letsgo = 5
 npl = np.array([1875, 936, 468, 234, 117, 3], dtype=np.int64)
 mlp_ptr = mlp_dll.createMLP(npl.ctypes.data_as(ctypes.POINTER(ctypes.c_int)), npl.size)
 data_dir = os.path.join(current_dir, '..', 'Test_image')
-train_inputs = allcolors(os.path.join(data_dir, '..', 'Train_image'))
-train_expected_outputs = expected_image(os.path.join(data_dir, '..', 'Train_image'))
-test_inputs = allcolors(os.path.join(data_dir, '..','Test_image'))
-test_expected_outputs = expected_image(os.path.join(data_dir, '..','Test_image'))
+train_inputs = create_listTest.allcolors(os.path.join(data_dir, '..', 'Train_image'))
+train_expected_outputs = create_listTest.expected_image(os.path.join(data_dir, '..', 'Train_image'))
+test_inputs = create_listTest.allcolors(os.path.join(data_dir, '..','Test_image'))
+test_expected_outputs = create_listTest.expected_image(os.path.join(data_dir, '..','Test_image'))
 print(train_expected_outputs)
 if train_inputs is not None and train_expected_outputs is not None and test_inputs is not None and test_expected_outputs is not None:
             # Entraînement du MLP sur les données d'entraînement
@@ -148,7 +100,3 @@ if train_inputs is not None and train_expected_outputs is not None and test_inpu
             print(f"Accuracy : {accuracy}")
             # Suppression du MLP
             mlp_dll.deleteMLP(mlp_ptr)
-
-
-
-
