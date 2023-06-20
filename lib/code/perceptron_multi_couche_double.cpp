@@ -16,7 +16,10 @@ extern "C"
         double*** W;
         double** X;
         double** deltas;
+
+        
     };
+
 
     MLP* createMLP(int* npl, int npl_size)
     {
