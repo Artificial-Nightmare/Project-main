@@ -30,7 +30,7 @@ mlp_dll.train.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_double), ctyp
 
 # Chargement des données d'entraînement et de test
 # Définition de la structure du MLP
-npl = np.array([10, 20, 3], dtype=np.int64)
+npl = np.array([75,15, 3], dtype=np.int64)
 
 mlp_ptr = mlp_dll.createMLP(npl.ctypes.data_as(ctypes.POINTER(ctypes.c_int)), npl.size)
 
@@ -44,7 +44,7 @@ test_expected_outputs = np.array(create_listTest.expected_image(os.path.join(dat
 samples_inputs = train_inputs
 samples_expected_outputs = train_expected_outputs
 num_epochs = 100000
-learning_rate = 0.0002
+learning_rate = 0.4
 mlp_dll.train(mlp_ptr,
                samples_inputs.ctypes.data_as(ctypes.POINTER(ctypes.c_double)),
                samples_expected_outputs.ctypes.data_as(ctypes.POINTER(ctypes.c_double)),
@@ -59,11 +59,13 @@ for i in range(test_inputs.shape[0]):
     mlp_dll.predict(mlp_ptr, 
                     input.ctypes.data_as(ctypes.POINTER(ctypes.c_double)), 
                     input.size, 
-                    False, 
+                    True, 
                     output.ctypes.data_as(ctypes.POINTER(ctypes.c_double)), 
                     output.size)
     print(f"Instance {i}:")
     for j in range(expected_output.size):
+        threshold = 0.5
+        predicted_outputs = np.where(output > threshold, 1.0, 0.0)
         print(f"Expected output {j}: {expected_output[j]}, Output {j}: {output[j]}")
 
 
