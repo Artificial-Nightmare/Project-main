@@ -63,7 +63,7 @@ mlp_dll.train.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_double), ctyp
 
 letsgo = 5
 # Chargement des données d'entraînement et de test
-npl = np.array([1875, 625, 312,156, 3], dtype=np.int64)
+npl = np.array([1875, 936, 468, 234, 117, 3], dtype=np.int64)
 mlp_ptr = mlp_dll.createMLP(npl.ctypes.data_as(ctypes.POINTER(ctypes.c_int)), npl.size)
 data_dir = os.path.join(current_dir, '..', 'Test_image')
 train_inputs = allcolors(os.path.join(data_dir, '..', 'Train_image'))
@@ -73,8 +73,8 @@ test_expected_outputs = expected_image(os.path.join(data_dir, '..','Test_image')
 
 if train_inputs is not None and train_expected_outputs is not None and test_inputs is not None and test_expected_outputs is not None:
             # Entraînement du MLP sur les données d'entraînement
-            num_iterations = 10000
-            learning_rate = 0.001
+            num_iterations = 30000
+            learning_rate = 0.1
             print(f"Entraînement du MLP sur {num_iterations} itérations avec un taux d'apprentissage de {learning_rate}")
             for i in range(num_iterations):
                 mlp_dll.train(mlp_ptr,
