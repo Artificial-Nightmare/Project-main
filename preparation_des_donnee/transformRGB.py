@@ -8,7 +8,7 @@ data3 = "Balle_de_baseball"
 
 
 # Chemin du dossier contenant les images
-dir_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "dataset_Same_Size", data3))
+dir_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "Train_image"))
 
 # Parcourir tous les fichiers dans le dossier
 for filename in os.listdir(dir_path):

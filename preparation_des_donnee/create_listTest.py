@@ -44,8 +44,7 @@ def allcolors(directory):
         all_pixels[np.isnan(all_pixels)] = 0  # Remplacer les NaN par des zéros
         return np.array(all_pixels,dtype=np.double)
     else:
-        print(f"Aucune image valide trouvée dans le dossier {directory}")
-
+        print("Aucune image n'a été trouvée dans le dossier.")
 
 
 
