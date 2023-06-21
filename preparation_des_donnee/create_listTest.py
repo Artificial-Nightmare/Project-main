@@ -37,11 +37,7 @@ def allcolors(directory):
                 pixels.append((r, g, b))
             all_pixels.append(pixels)
     if all_pixels:
-        all_pixels = np.array(all_pixels)
-        std = np.std(all_pixels, axis=0)
-        std[std == 0] = 1  # Remplacer les zéros par des uns
-        all_pixels = (all_pixels - np.mean(all_pixels, axis=0)) / std
-        all_pixels[np.isnan(all_pixels)] = 0  # Remplacer les NaN par des zéros
+       
         return np.array(all_pixels,dtype=np.double)
     else:
         print("Aucune image n'a été trouvée dans le dossier.")
