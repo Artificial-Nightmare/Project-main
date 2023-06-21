@@ -43,32 +43,34 @@ test_expected_outputs = np.array(create_listTest.expected_image(os.path.join(dat
 # Entraînement du MLP sur un nombre spécifique d'époques
 samples_inputs = train_inputs
 samples_expected_outputs = train_expected_outputs
-num_epochs = 50000
-learning_rate = 0.07
+num_epochs = 10000000
+learning_rate = 0.004
 mlp_dll.train(mlp_ptr,
                samples_inputs.ctypes.data_as(ctypes.POINTER(ctypes.c_double)),
                samples_expected_outputs.ctypes.data_as(ctypes.POINTER(ctypes.c_double)),
                samples_inputs.shape[0], samples_inputs.shape[1], samples_expected_outputs.shape[1],
                True, num_epochs, learning_rate)
 
-# Test du MLP sur les données de test
+
+# Prédire les étiquettes des données de test
+predictions = []
 for i in range(test_inputs.shape[0]):
-    input = test_inputs[i]
-    expected_output = test_expected_outputs[i]   
-    output = np.zeros(3, dtype=np.double)
+    input_data = np.ascontiguousarray(test_inputs[i]).astype(np.float64)
+    output = np.ascontiguousarray(np.zeros(3)).astype(np.float64)
     mlp_dll.predict(mlp_ptr, 
-                    input.ctypes.data_as(ctypes.POINTER(ctypes.c_double)), 
-                    input.size, 
-                    True, 
-                    output.ctypes.data_as(ctypes.POINTER(ctypes.c_double)), 
-                    output.size)
-    print(f"Instance {i}:")
-    for j in range(expected_output.size):
-        threshold = 0.5
-        predicted_outputs = np.where(output > threshold, 1.0, 0.0)
-        print(f"Expected output {j}: {expected_output[j]}, Output {j}: {output[j]}")
+                     input_data.ctypes.data_as(ctypes.POINTER(ctypes.c_double)), 
+                     input_data.size, 
+                     False, 
+                     output.ctypes.data_as(ctypes.POINTER(ctypes.c_double)), 
+                     output.size)
+    predicted_class = np.argmax(output)
+    expected_class = np.argmax(test_expected_outputs[i])
+    predictions.append(predicted_class)
+    print(f"Exemple {i+1}: Attendu={expected_class}, Prédit={predicted_class} ({output})")
 
-
+# Évaluer les prédictions
+accuracy = np.mean(np.array(predictions) == np.argmax(test_expected_outputs, axis=1))
+print(f"Précision: {accuracy}")
 
 
 

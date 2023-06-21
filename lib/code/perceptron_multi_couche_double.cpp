@@ -95,7 +95,7 @@ extern "C"
     void predict(MLP* mlp, double *inputs, int inputs_size, bool is_classification, double *output, int outputs_size)
     {
         propagate(mlp, inputs, is_classification);
-        for (int j = 1; j <= mlp->d[mlp->L]; ++j)
+        for (int j = 0; j <= mlp->d[mlp->L]; ++j)
         {
             output[j - 1] = mlp->X[mlp->L][j];
         }
