@@ -46,9 +46,9 @@ def rezise_all_image(directory, x, y):
                 img_resized.close()
 
 dirname = os.path.abspath(os.path.dirname(__file__))
-images_folder = os.path.join(dirname, "..", "dataset", football)
-output_folder = os.path.join(dirname, "..", "dataset_Same_Size", football)
-new_size = (8, 8) # Taille de la nouvelle image
+images_folder = os.path.join(dirname, "..", "dataset", baseball)
+output_folder = os.path.join(dirname, "..", "dataset_Same_Size", baseball)
+new_size = (25, 25) # Taille de la nouvelle image
 
 # Parcourez chaque image dans le dossier images_folder
 for filename in os.listdir(images_folder):

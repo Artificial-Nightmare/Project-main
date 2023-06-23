@@ -75,20 +75,18 @@ extern "C"
 }
 
 
-    void predict(MLP* mlp, double *inputs, int inputs_size, bool is_classification, double *output, int outputs_size){
-        // Vérification de la taille des entrées
-        if(inputs_size != mlp->d[0]){
-            cout << "Erreur : la taille des entrées ne correspond pas au nombre de neurones de la première couche." << endl;
-            return;
-        }
-        
-        propagate(mlp, inputs, is_classification);
-        
-        // Copie des sorties dans le tableau de sortie
-        for(int i=0; i<outputs_size; i++){
-            output[i] = inputs[i];
-        }
+void predict(MLP* mlp, double *inputs, int inputs_size, bool is_classification, double *output, int outputs_size){
+    // Vérification de la taille des entrées
+    if(inputs_size != mlp->d[0]){
+        cout << "Erreur : la taille des entrées ne correspond pas au nombre de neurones de la première couche." << endl;
+        return;
     }
+    
+    propagate(mlp, inputs, is_classification);
+    
+    // Copie des sorties dans le tableau de sortie
+    memcpy(output, mlp->X[mlp->L], outputs_size * sizeof(double));
+}
 
     void train(MLP* mlp, double *samples_inputs, double *samples_expected_outputs,
            int samples_size, int inputs_size, int outputs_size,

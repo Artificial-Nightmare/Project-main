@@ -15,7 +15,7 @@ data3 = "dataset_Same_Size"
 
 # Chemin du dossier contenant les images à renommer
 dirname = os.path.abspath(os.path.dirname(__file__))
-source_dir = os.path.join(dirname, "..", data3, basket)
+source_dir = os.path.join(dirname, "..", data3, football)
 
 # Liste des fichiers dans le dossier
 files = os.listdir(source_dir)
@@ -42,7 +42,7 @@ for file in files:
             count += 1
         
         # Nouveau nom de fichier avec numéro séquentiel
-        new_filename = f"{nameBasketball}{count}.jpg"
+        new_filename = f"{nameFootball}{count}.jpg"
         # Chemin complet du nouveau fichier
         dest_path = os.path.join(source_dir, new_filename)
         # Renommage du fichier

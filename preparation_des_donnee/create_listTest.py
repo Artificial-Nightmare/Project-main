@@ -37,10 +37,13 @@ def allcolors(directory):
                 pixels.append((r, g, b))
             all_pixels.append(pixels)
     if all_pixels:
-       
-        return np.array(all_pixels,dtype=np.double)
+        # Convertir les pixels en tableau numpy et normaliser les pixels
+        all_pixels = np.array(all_pixels, dtype=np.double)
+        all_pixels = all_pixels / 255.0
+        return all_pixels
     else:
         print("Aucune image n'a été trouvée dans le dossier.")
+
 
 
 
