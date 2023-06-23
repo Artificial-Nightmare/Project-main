@@ -30,7 +30,7 @@ mlp_dll.train.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_double), ctyp
 
 # Chargement des données d'entraînement et de test
 # Définition de la structure du MLP
-npl = np.array([192,6,3], dtype=np.int64)
+npl = np.array([1875,1024,256,128,3], dtype=np.int64)
 
 mlp_ptr = mlp_dll.createMLP(npl.ctypes.data_as(ctypes.POINTER(ctypes.c_int)), npl.size)
 
@@ -44,7 +44,7 @@ test_expected_outputs = np.array(create_listTest.expected_image(os.path.join(dat
 samples_inputs = train_inputs
 samples_expected_outputs = train_expected_outputs
 num_epochs = 75000
-learning_rate = 0.00017
+learning_rate = 0.001
 mlp_dll.train(mlp_ptr,
                samples_inputs.ctypes.data_as(ctypes.POINTER(ctypes.c_double)),
                samples_expected_outputs.ctypes.data_as(ctypes.POINTER(ctypes.c_double)),

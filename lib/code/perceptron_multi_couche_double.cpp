@@ -16,180 +16,182 @@ extern "C"
         double*** W;
         double** X;
         double** deltas;
-
-        
     };
-
 
     MLP* createMLP(int* npl, int npl_size)
     {
-        MLP* mlp = new MLP();
-        mlp->d = new int[npl_size];
-        memcpy(mlp->d, npl, npl_size * sizeof(int));
-        mlp->L = npl_size - 1;
-        mlp->W = new double**[mlp->L + 1];
-        random_device rd;
-        mt19937 gen(rd());
-        uniform_real_distribution<double> dis(-1.0, 1.0);
+        MLP* mlp = new MLP;
 
-        for (int l = 1; l <= mlp->L; ++l){
-            mlp->W[l] = new double*[mlp->d[l - 1] + 1];
-            for (int i = 0; i <= mlp->d[l - 1]; ++i){
-                mlp->W[l][i] = new double[mlp->d[l] + 1];
-                for (int j = 1; j <= mlp->d[l]; ++j){
-                    mlp->W[l][i][j] = (j == 0) ? 0.0 : dis(gen);
+        mlp->L = npl_size - 1;
+        mlp->d = new int[npl_size];
+
+        for(int i = 0; i < npl_size; i++)
+        {
+            mlp->d[i] = npl[i];
+        }
+
+        mlp->W = new double**[mlp->L];
+        mlp->X = new double*[mlp->L + 1];
+        mlp->deltas = new double*[mlp->L];
+
+        for(int i = 0; i < mlp->L; i++)
+        {
+            mlp->W[i] = new double*[mlp->d[i+1]];
+            mlp->deltas[i] = new double[mlp->d[i+1]];
+
+            for(int j = 0; j < mlp->d[i+1]; j++)
+            {
+                mlp->W[i][j] = new double[mlp->d[i]+1];
+
+                for(int k = 0; k < mlp->d[i]+1; k++)
+                {
+                    mlp->W[i][j][k] = ((double)rand() / RAND_MAX) * 2 - 1;
                 }
             }
         }
 
-        mlp->X = new double*[mlp->L + 1];
-        for (int l = 0; l <= mlp->L; ++l){
-            mlp->X[l] = new double[mlp->d[l] + 1];
-            for (int j = 0; j <= mlp->d[l]; ++j){
-                mlp->X[l][j] = (j == 0) ? 1.0 : 0.0;
-            }
+        for(int i = 0; i < mlp->L + 1; i++)
+        {
+            mlp->X[i] = new double[mlp->d[i]+1];
         }
 
-        mlp->deltas = new double*[mlp->L + 1];
-        for (int l = 0; l <= mlp->L; ++l){
-            mlp->deltas[l] = new double[mlp->d[l] + 1];
-            for (int j = 0; j <= mlp->d[l]; ++j){
-                mlp->deltas[l][j] = 0.0;
-            }
-        }
         return mlp;
     }
 
-    void propagate(MLP* mlp, double* inputs, bool is_classification){
-        for (int j = 0; j < mlp->d[0]; ++j){
-            mlp->X[0][j + 1] = inputs[j];
+    void propagate(MLP* mlp, double* inputs, bool is_classification)
+    {
+        for(int i = 0; i < mlp->d[0]; i++)
+        {
+            mlp->X[0][i] = inputs[i];
         }
-        for (int l = 1; l <= mlp->L; ++l){
-            for (int j = 1; j <= mlp->d[l]; ++j){
-                double total = 0.0;
-                for (int i = 0; i <= mlp->d[l - 1]; ++i){
-                    total += mlp->W[l][i][j] * mlp->X[l - 1][i];
+
+        mlp->X[0][mlp->d[0]] = 1;
+
+        for(int i = 1; i < mlp->L + 1; i++)
+        {
+            for(int j = 0; j < mlp->d[i]; j++)
+            {
+                double sum = 0;
+
+                for(int k = 0; k < mlp->d[i-1]+1; k++)
+                {
+                    sum += mlp->W[i-1][j][k] * mlp->X[i-1][k];
                 }
-                if (l < mlp->L || is_classification){
-                    total = std::tanh(total);
-                }
-                mlp->X[l][j] = total;
+
+                mlp->X[i][j] = 1 / (1 + exp(-sum));
+            }
+
+            if(i != mlp->L || !is_classification)
+            {
+                mlp->X[i][mlp->d[i]] = 1;
             }
         }
     }
 
-    void predict(MLP* mlp, double *inputs, int inputs_size, bool is_classification, double *output, int outputs_size){
+    void predict(MLP* mlp, double *inputs, int inputs_size, bool is_classification, double *output, int outputs_size)
+    {
         propagate(mlp, inputs, is_classification);
-        for (int j = 0; j <= mlp->d[mlp->L]; ++j){
-            output[j - 1] = mlp->X[mlp->L][j];
+
+        for(int i = 0; i < outputs_size; i++)
+        {
+            output[i] = mlp->X[mlp->L][i];
         }
     }
 
-    void train(MLP* mlp, double *samples_inputs, double *samples_expected_outputs,
+ void train(MLP* mlp, double *samples_inputs, double *samples_expected_outputs,
            int samples_size, int inputs_size, int outputs_size,
-           bool is_classification, int iteration_count, double alpha){
-    double** all_samples_inputs = new double*[samples_size];
-    double** all_samples_expected_outputs = new double*[samples_size];
+           bool is_classification, int iteration_count, double alpha)
+    {
+        double loss = 0;
+        double accuracy = 0;
+        
+        for(int i = 0; i < iteration_count; i++)
+        {
+            int index = rand() % samples_size;
 
-    for (int i = 0; i < samples_size; ++i){
-        all_samples_inputs[i] = new double[inputs_size];
-        all_samples_expected_outputs[i] = new double[outputs_size];
-        for (int j = 0; j < inputs_size; ++j){
-            all_samples_inputs[i][j] = samples_inputs[i * inputs_size + j];
-        }
-        for (int j = 0; j < outputs_size; ++j){
-            all_samples_expected_outputs[i][j] = samples_expected_outputs[i * outputs_size + j];
-        }
-    }
+            propagate(mlp, &samples_inputs[index * inputs_size], is_classification);
 
-    random_device rd;
-    mt19937 gen(rd());
-    uniform_int_distribution<int> dis(0, samples_size - 1);
-    double loss = 0.0;
-    double accuracy = 0.0;
-    for (int it = 0; it < iteration_count; ++it){
-        int k = dis(gen);
-        double* inputs_k = all_samples_inputs[k];
-        double* y_k = all_samples_expected_outputs[k];
-
-        propagate(mlp, inputs_k, is_classification);
-        for (int j = 1; j <= mlp->d[mlp->L]; ++j){
-            mlp->deltas[mlp->L][j] = mlp->X[mlp->L][j] - y_k[j - 1];
-            if (is_classification)
-                mlp->deltas[mlp->L][j] *= (1.0 - mlp->X[mlp->L][j] * mlp->X[mlp->L][j]);
-        }
-        for (int l = mlp->L - 1; l >= 1; --l){
-            for (int i = 1; i <= mlp->d[l - 1]; ++i){
-                double total = 0.0;
-                for (int j = 1; j <= mlp->d[l]; ++j)
-                    total += mlp->W[l + 1][i][j] * mlp->deltas[l + 1][j];
-                mlp->deltas[l][i] = (1.0 - mlp->X[l][i] * mlp->X[l][i]) * total;
-            }
-        }
-        for (int l = 1; l <= mlp->L; ++l){
-            for (int i = 0; i <= mlp->d[l - 1]; ++i){
-                for (int j = 1; j <= mlp->d[l]; ++j)
-                    mlp->W[l][i][j] -= alpha * mlp->X[l - 1][i] * mlp->deltas[l][j];
-            }
-        }
-        // calculate loss and accuracy
-        loss = 0.0;
-        accuracy = 0.0;
-        for (int i = 0; i < samples_size; ++i) {
-            double *inputs_i = all_samples_inputs[i];
-            double *y_i = all_samples_expected_outputs[i];
-            double output[mlp->d[mlp->L]];
-            predict(mlp, inputs_i, inputs_size, is_classification, output, mlp->d[mlp->L]);
-            for (int j = 0; j < mlp->d[mlp->L]; ++j) {
-                loss += (output[j] - y_i[j]) * (output[j] - y_i[j]);
-                if (is_classification) {
-                    if ((output[j] > 0.5 && y_i[j] > 0.5) || (output[j] < 0.5 && y_i[j] < 0.5)) {
-                        accuracy += 1.0;
+            for(int j = 0; j < outputs_size; j++)
+            {
+                mlp->deltas[mlp->L-1][j] = (samples_expected_outputs[index * outputs_size + j] - mlp->X[mlp->L][j]) * mlp->X[mlp->L][j] * (1 - mlp->X[mlp->L][j]);
+                loss += pow(samples_expected_outputs[index * outputs_size + j] - mlp->X[mlp->L][j], 2);
+                if(is_classification)
+                {
+                    if(round(mlp->X[mlp->L][j]) == samples_expected_outputs[index * outputs_size + j])
+                    {
+                        accuracy += 1;
                     }
-                } else {
-                    accuracy += 1.0 / samples_size * fabs(output[j] - y_i[j]);
                 }
             }
+
+            for(int j = mlp->L - 2; j >= 0; j--)
+            {
+                for(int k = 0; k < mlp->d[j+1]; k++)
+                {
+                    double sum = 0;
+
+                    for(int l = 0; l < mlp->d[j+2]; l++)
+                    {
+                        sum += mlp->W[j+1][l][k] * mlp->deltas[j+1][l];
+                    }
+
+                    mlp->deltas[j][k] = sum * mlp->X[j+1][k] * (1 - mlp->X[j+1][k]);
+                }
+            }
+
+            for(int j = 0; j < mlp->L; j++)
+            {
+                for(int k = 0; k < mlp->d[j+1]; k++)
+                {
+                    for(int l = 0; l < mlp->d[j]+1; l++)
+                    {
+                        if(l == mlp->d[j])
+                        {
+                            mlp->W[j][k][l] += alpha * mlp->deltas[j][k];
+                        }
+                        else
+                        {
+                            mlp->W[j][k][l] += alpha * mlp->deltas[j][k] * mlp->X[j][l];
+                        }
+                    }
+                }
+            }
+            
+            if(i % 500 == 0)
+            {
+                loss = loss / (outputs_size * 500);
+                accuracy = accuracy / (outputs_size * 500);
+                printf("Iteration %d: Loss = %.4f, Accuracy = %.2f%%\n", i, loss, accuracy * 100);
+                loss = 0;
+                accuracy = 0;
+            }
         }
-        loss /= 2 * samples_size;
-        if (is_classification) {
-            accuracy /= samples_size * mlp->d[mlp->L];
-        } else {
-            accuracy = 1.0 - accuracy;
-        }
-        // display loss and accuracy
-        cout << "Iteration " << it << ": Loss = " << loss << ", Accuracy = " << accuracy << endl;
     }
 
-    for (int i = 0; i < samples_size; ++i){
-        delete[] all_samples_inputs[i];
-        delete[] all_samples_expected_outputs[i];
-    }
-    delete[] all_samples_inputs;
-    delete[] all_samples_expected_outputs;
-}
 
     void deleteMLP(MLP* mlp)
     {
-        for (int l = 1; l <= mlp->L; ++l)
+        for(int i = 0; i < mlp->L; i++)
         {
-            for (int i = 0; i <= mlp->d[l - 1]; ++i)
+            for(int j = 0; j < mlp->d[i+1]; j++)
             {
-                delete[] mlp->W[l][i];
+                delete[] mlp->W[i][j];
             }
-            delete[] mlp->W[l];
-        }
-        delete[] mlp->W;
 
-        for (int l = 0; l <= mlp->L; ++l)
-        {
-            delete[] mlp->X[l];
-            delete[] mlp->deltas[l];
+            delete[] mlp->W[i];
+            delete[] mlp->deltas[i];
         }
+
+        for(int i = 0; i < mlp->L + 1; i++)
+        {
+            delete[] mlp->X[i];
+        }
+
+        delete[] mlp->d;
+        delete[] mlp->W;
         delete[] mlp->X;
         delete[] mlp->deltas;
 
-        delete[] mlp->d;
         delete mlp;
     }
 }
