@@ -39,7 +39,7 @@ print(train_inputs.shape)
 samples_inputs = train_inputs
 samples_expected_outputs = train_expected_outputs
 num_epochs = 1000000
-learning_rate = 0.00014
+learning_rate = 0.000145
 mlp_ptr = trainer.training(num_epochs, learning_rate,samples_inputs,samples_expected_outputs,mlp_ptr)
 # Charger les données de test
 test_inputs = np.array(create_listTest.allcolors(os.path.join(data_dir, '..', 'Test_image')))

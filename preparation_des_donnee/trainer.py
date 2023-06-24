@@ -38,7 +38,7 @@ def predict(mlp_ptr, inputs):
     outputs_size = 3  # Remplacez 3 par le nombre de classes dans votre cas
     
     # Créer un tableau numpy pour les sorties
-    outputs = np.zeros((inputs.shape[0], outputs_size), dtype=np.double)
+    outputs = np.zeros((outputs_size, outputs_size), dtype=np.double)
     
     # Appeler la fonction predict de la DLL
     mlp_dll.predict(mlp_ptr, inputs_ptr, inputs_size, False,
