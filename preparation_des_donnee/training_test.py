@@ -5,6 +5,7 @@ import ctypes
 import sys
 import create_listTest
 import trainer
+import pickle
 
 dirname = os.path.abspath(os.path.dirname(__file__))
 chemin = os.path.join(dirname,"..", "Test_image")
@@ -28,6 +29,7 @@ mlp_dll.deleteMLP.argtypes = [ctypes.c_void_p]
 
 # Chargement des données d'entraînement et de test
 # Définition de la structure du MLP
+
 npl = np.array([1875,32,3], dtype=np.int32)
 mlp_ptr = mlp_dll.createMLP(npl.ctypes.data_as(ctypes.POINTER(ctypes.c_int)), npl.size)
 
@@ -38,22 +40,24 @@ print(train_inputs.shape)
 # Entraînement du MLP sur un nombre spécifique d'époques
 samples_inputs = train_inputs
 samples_expected_outputs = train_expected_outputs
-num_epochs = 1000000
-learning_rate = 0.000145
+num_epochs = 100000
+learning_rate = 0.001945
 mlp_ptr = trainer.training(num_epochs, learning_rate,samples_inputs,samples_expected_outputs,mlp_ptr)
+
+
 # Charger les données de test
 test_inputs = np.array(create_listTest.allcolors(os.path.join(data_dir, '..', 'Test_image')))
 test_expected_outputs = np.array(create_listTest.expected_image(os.path.join(data_dir, '..', 'Test_image')))
 
 # Convertir le pointeur mlp_ptr en un pointeur valide de type MLP
 mlp = ctypes.cast(mlp_ptr, ctypes.POINTER(ctypes.c_void_p)).contents
-
+print(mlp)
 
 # Charger les images d'entrée et les étiquettes attendues
 input_images = test_inputs
 expected_outputs = test_expected_outputs
 
-# Appeler la fonction predict
+# Appeler la fonction predict_list
 predicted_outputs = trainer.predict(mlp_ptr, test_inputs)
 
 # Obtenir l'indice de la classe prédite pour chaque prédiction
@@ -68,6 +72,3 @@ for i in range(len(predicted_classes)):
     expected_class = expected_classes[i]
     print(f"Exemple {i+1} - Prédiction : {predicted_class}, Attendu : {expected_class}")
     print(f"Sortie du MLP : {predicted_outputs[i]}")
-
-
-

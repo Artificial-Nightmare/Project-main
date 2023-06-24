@@ -29,22 +29,25 @@ def training(num_epochs, learning_rate,samples_inputs,samples_expected_outputs,m
                True, num_epochs, learning_rate)
     return mlp_ptr
     
-def predict(mlp_ptr, inputs):
-    # Convertir les tableaux numpy en tableaux de type ctypes
-    inputs_ptr = inputs.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
+def predict(mlp_ptr, inputs_list):
+    # Convertir la liste d'entrées en un tableau numpy
+    inputs = np.array(inputs_list, dtype=np.double)
     
-    # Obtenir les tailles des entrées et des sorties
-    inputs_size = inputs.shape[1]
-    outputs_size = 3  # Remplacez 3 par le nombre de classes dans votre cas
+    # Créer un tableau numpy pour stocker les sorties prédites
+    outputs = np.zeros((inputs.shape[0], 3), dtype=np.double)
     
-    # Créer un tableau numpy pour les sorties
-    outputs = np.zeros((outputs_size, outputs_size), dtype=np.double)
-    
-    # Appeler la fonction predict de la DLL
-    mlp_dll.predict(mlp_ptr, inputs_ptr, inputs_size, False,
-                    outputs.ctypes.data_as(ctypes.POINTER(ctypes.c_double)), outputs_size)
+    # Appeler la fonction predict pour chaque entrée
+    for i in range(inputs.shape[0]):
+        input_data = inputs[i]
+        mlp_dll.predict(mlp_ptr, 
+                        input_data.ctypes.data_as(ctypes.POINTER(ctypes.c_double)), 
+                        input_data.size, 
+                        True, 
+                        outputs[i].ctypes.data_as(ctypes.POINTER(ctypes.c_double)), 
+                        outputs[i].size)
     
     return outputs
+
 
 
 
