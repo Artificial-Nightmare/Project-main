@@ -34,15 +34,16 @@ def allcolors(directory):
             pixels = []
             for pixel in image.getdata():
                 r, g, b = pixel
-                pixels.append((r, g, b))
+                pixels.extend([r / 255.0, g / 255.0, b / 255.0])
             all_pixels.append(pixels)
     if all_pixels:
-        # Convertir les pixels en tableau numpy et normaliser les pixels
+        # Convertir les pixels en tableau numpy
         all_pixels = np.array(all_pixels, dtype=np.double)
-        all_pixels = all_pixels / 255.0
-        return all_pixels
+        return all_pixels.reshape((all_pixels.shape[0], -1))
     else:
         print("Aucune image n'a été trouvée dans le dossier.")
+
+
 
 
 
