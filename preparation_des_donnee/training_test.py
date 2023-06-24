@@ -28,7 +28,7 @@ mlp_dll.deleteMLP.argtypes = [ctypes.c_void_p]
 
 # Chargement des données d'entraînement et de test
 # Définition de la structure du MLP
-npl = np.array([1875,1,3], dtype=np.int64)
+npl = np.array([1875,32,3], dtype=np.int32)
 mlp_ptr = mlp_dll.createMLP(npl.ctypes.data_as(ctypes.POINTER(ctypes.c_int)), npl.size)
 
 data_dir = os.path.join(current_dir, '..', 'Test_image')
@@ -38,8 +38,8 @@ print(train_inputs.shape)
 # Entraînement du MLP sur un nombre spécifique d'époques
 samples_inputs = train_inputs
 samples_expected_outputs = train_expected_outputs
-num_epochs = 500000
-learning_rate = 0.0007
+num_epochs = 1000000
+learning_rate = 0.00014
 mlp_ptr = trainer.training(num_epochs, learning_rate,samples_inputs,samples_expected_outputs,mlp_ptr)
 # Charger les données de test
 test_inputs = np.array(create_listTest.allcolors(os.path.join(data_dir, '..', 'Test_image')))
@@ -56,8 +56,18 @@ expected_outputs = test_expected_outputs
 # Appeler la fonction predict
 predicted_outputs = trainer.predict(mlp_ptr, test_inputs)
 
-# Afficher les sorties prédites
-print("Sorties prédites du MLP :")
-print(predicted_outputs)
+# Obtenir l'indice de la classe prédite pour chaque prédiction
+# Obtenir l'indice de la classe attendue pour chaque étiquette
+predicted_classes = np.argmax(predicted_outputs, axis=1)
+expected_classes = np.argmax(test_expected_outputs, axis=1)
+
+# Afficher les classes prédites et les classes attendues côte à côte
+print("Prédictions du MLP :")
+for i in range(len(predicted_classes)):
+    predicted_class = predicted_classes[i]
+    expected_class = expected_classes[i]
+    print(f"Exemple {i+1} - Prédiction : {predicted_class}, Attendu : {expected_class}")
+    print(f"Sortie du MLP : {predicted_outputs[i]}")
+
 
 
