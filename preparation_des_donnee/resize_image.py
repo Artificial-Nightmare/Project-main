@@ -44,11 +44,17 @@ def rezise_all_image(directory, x, y):
                 img_resized.save(image_path)
                 # Fermeture de l'image redimensionnée
                 img_resized.close()
+                print("test")
+        else:
+            print(f"Le fichier {file} n'est pas une image")
+
+        print("test1")
+    print("test0")
 
 dirname = os.path.abspath(os.path.dirname(__file__))
 images_folder = os.path.join(dirname, "..", "dataset", football)
 output_folder = os.path.join(dirname, "..", "dataset_Same_Size", football)
-new_size = (25, 25) # Taille de la nouvelle image
+new_size = (20, 20) # Taille de la nouvelle image
 
 # Parcourez chaque image dans le dossier images_folder
 for filename in os.listdir(images_folder):
@@ -58,7 +64,7 @@ for filename in os.listdir(images_folder):
     # Redimensionner l'image
     resize_image(image_path, output_path, size=new_size)
 
-know_all_size(output_folder)
+#know_all_size(images_folder)
 
 #rezise_all_image(output_folder, new_size=(25, 25))
 
