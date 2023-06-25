@@ -40,7 +40,7 @@ print(train_inputs.shape)
 # Entraînement du MLP sur un nombre spécifique d'époques
 samples_inputs = train_inputs
 samples_expected_outputs = train_expected_outputs
-num_epochs = 100000
+num_epochs = 200000
 learning_rate = 0.002545
 mlp_ptr = trainer.training(num_epochs, learning_rate,samples_inputs,samples_expected_outputs,mlp_ptr)
 
