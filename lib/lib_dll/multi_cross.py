@@ -21,50 +21,47 @@ mlp_dll.predict.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_double), ct
 mlp_dll.train.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double), ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_bool, ctypes.c_int, ctypes.c_double]
 
 # Création du MLP avec 2 entrées, 2 neurones cachés et 1 sortie
-npl = np.array([2,4, 1], dtype=np.int32)
+npl = np.array([2,64,64, 3], dtype=np.int32)
 mlp_ptr = mlp_dll.createMLP(npl.ctypes.data_as(ctypes.POINTER(ctypes.c_int)), npl.size)
 
-X = np.random.random((500, 2)) * 2.0 - 1.0
+X = np.random.random((1000, 2)) * 2.0 - 1.0
 samples_inputs = np.array(X, dtype=np.double)
-Y = np.array([1 if abs(p[0]) <= 0.3 or abs(p[1]) <= 0.3 else -1 for p in X])
+Y = np.array([[1, 0, 0] if abs(p[0] % 0.5) <= 0.25 and abs(p[1] % 0.5) > 0.25 else [0, 1, 0] if abs(p[0] % 0.5) > 0.25 and abs(p[1] % 0.5) <= 0.25 else [0, 0, 1] for p in X])
 samples_expected_outputs = np.array(Y, dtype=np.double)
 mlp_dll.train(mlp_ptr,
                samples_inputs.ctypes.data_as(ctypes.POINTER(ctypes.c_double)),
                samples_expected_outputs.ctypes.data_as(ctypes.POINTER(ctypes.c_double)),
                samples_inputs.shape[0], samples_inputs.shape[1], 1,
-               True, 2000000, 0.1)
-
-
-input_size = 2
-output_size = 1
-
-input = np.zeros(input_size, dtype=np.double)
-output = np.zeros(output_size, dtype=np.double)
+               True, 500000, 0.000012)
 
 correct_predictions = 0
-
+total_predictions = samples_inputs.shape[0]
+# Utilisation de la fonction "predict" pour prédire les sorties pour chaque entrée
 for i in range(samples_inputs.shape[0]):
-    input[0] = samples_inputs[i, 0]
-    input[1] = samples_inputs[i, 1]
+    input = samples_inputs[i]
+    output = np.zeros(samples_expected_outputs.shape[1], dtype=np.double)
+
     mlp_dll.predict(mlp_ptr, 
                     input.ctypes.data_as(ctypes.POINTER(ctypes.c_double)), 
                     input.size, 
                     True, 
                     output.ctypes.data_as(ctypes.POINTER(ctypes.c_double)), 
                     output.size)
-    expected_class = int(samples_expected_outputs[i])
-    predicted_class = 1 if output[0] >= 0.5 else -1
-    print(f"[{input[0]}, {input[1]}] Expected Class: {expected_class}, Predicted Class: {predicted_class}")
-    
-    if expected_class == predicted_class:
+
+    predicted_label = np.argmax(output)
+    expected_label = np.argmax(samples_expected_outputs[i])
+
+    print("Entrée :", input)
+    print("Sortie prédite :", output)
+    print("Sortie attendue :", samples_expected_outputs[i])
+
+    if predicted_label == expected_label:
         correct_predictions += 1
 
-accuracy = (correct_predictions / samples_inputs.shape[0]) * 100
-print(f"\nAccuracy: {accuracy}%")
+    print()
 
-
-
-
+accuracy = correct_predictions / total_predictions
+print("Taux de réussite : {:.2%}".format(accuracy))     
 
 # Suppression du MLP
 mlp_dll.deleteMLP(mlp_ptr)
