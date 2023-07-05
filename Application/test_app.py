@@ -1,9 +1,9 @@
-from tkinter import *
-from tkinter import filedialog
-from PIL import Image, ImageTk
 import os
 import math
 import shutil
+from tkinter import Tk, Label, Button, Frame, filedialog
+from PIL import Image, ImageTk
+import 
 
 root = Tk()
 
@@ -37,24 +37,26 @@ else:
     print(f"Attention : impossible de trouver {icon_path}.")
 
 def save_image(file_path):
-    destination_folder = '/Application/imageAtest/'
+    destination_folder = filedialog.askdirectory()
 
-    # Vérifier si le dossier existe et le créer s'il n'existe pas
-    if not os.path.exists(destination_folder):
-        os.makedirs(destination_folder)
+    if destination_folder:
+        # Vérifier si le dossier existe et le créer s'il n'existe pas
+        if not os.path.exists(destination_folder):
+            os.makedirs(destination_folder)
 
-    # Supprimer les fichiers existants dans le dossier
-    for the_file in os.listdir(destination_folder):
-        file_path = os.path.join(destination_folder, the_file)
-        try:
-            if os.path.isfile(file_path):
-                os.unlink(file_path)
-        except Exception as e:
-            print(e)
+        # Supprimer les fichiers existants dans le dossier
+        for the_file in os.listdir(destination_folder):
+            file_path = os.path.join(destination_folder, the_file)
+            try:
+                if os.path.isfile(file_path):
+                    os.unlink(file_path)
+            except Exception as e:
+                print(e)
 
-    # Renommer et enregistrer la nouvelle image
-    new_file_path = os.path.join(destination_folder, 'image.jpg')
-    shutil.move(file_path, new_file_path)
+        # Renommer et enregistrer la nouvelle image
+        new_file_path = os.path.join(destination_folder, 'image.jpg')
+        shutil.copy(file_path, new_file_path)
+        print("Image téléchargée avec succès!")
 
 def remove_image(default_label, img_label, choose_button, button_frame):
     # Supprimer l'image
@@ -96,13 +98,13 @@ def show_selected_image(file_path, default_label, img_label, choose_button):
 
         # Ajouter les boutons vert et rouge à droite de l'image
         green_button = Button(button_frame, text="Télécharger", bg="#4CAF50", fg="white",  width=10, command=lambda: save_image(file_path))
-        green_button.pack(side=RIGHT, padx=100, pady=10)
+        green_button.pack(side="right", padx=100, pady=10)
 
         red_button = Button(button_frame, text="Supprimer", bg="#EF5350", fg="white", width=7, padx=10, command=lambda: remove_image(default_label, img_label))
-        red_button.pack(side=RIGHT, padx=100, pady=10)
+        red_button.pack(side="right", padx=100, pady=10)
 
         # Ajouter le cadre sous l'image au centre
-        button_frame.pack(side=BOTTOM, pady=20)
+        button_frame.pack(side="bottom", pady=20)
 
 def choose_image(default_label, img_label, choose_button):
     file_path = filedialog.askopenfilename(filetypes=[("Images", "*.png;*.jpg;*.jpeg")])
