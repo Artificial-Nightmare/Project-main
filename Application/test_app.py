@@ -39,7 +39,14 @@ print(data_dir)
 
 def save_image(file_path):
     destination_folder = os.path.join(os.getcwd(), "Application", "imageAtest")
-
+    # Supprimer les fichiers existants dans le dossier "imageAtest"
+    for the_file in os.listdir(destination_folder):
+        file_path = os.path.join(destination_folder, the_file)
+        try:
+            if os.path.isfile(file_path):
+                os.unlink(file_path)
+        except Exception as e:
+            print(e)
     if destination_folder:
         # Vérifier si le dossier existe et le créer s'il n'existe pas
         if not os.path.exists(destination_folder):
@@ -80,6 +87,14 @@ def save_image(file_path):
             elif predicted_class == 2:      
                 cls = "Ballon de basket"
         print(cls)
+        for the_file in os.listdir(destination_folder):
+            file_path = os.path.join(destination_folder, the_file)
+        try:
+            if os.path.isfile(file_path):
+                os.unlink(file_path)
+        except Exception as e:
+            print(e)
+print(data_dir)
 
 def allcolors(directory):
     all_pixels = []
@@ -101,25 +116,6 @@ def allcolors(directory):
     else:
         print(f"Aucune image valide trouvée dans le dossier {directory}")
 
-def remove_image(default_label, img_label, choose_button, button_frame):
-    # Supprimer l'image
-    img_label.config(image='')
-    default_label.pack()
-
-    # Supprimer les boutons de la frame
-    for widget in button_frame.winfo_children():
-        widget.destroy()
-
-    # Réinitialiser l'interface
-    reset_interface(default_label, img_label, choose_button)
-
-def reset_interface(default_label, img_label, choose_button):
-    global button_frame
-    default_label.config(text="Aucune image sélectionnée")
-    choose_button.pack(pady=15)
-    create_button_frame(default_label, img_label, choose_button)
-
-
 def show_selected_image(file_path, default_label, img_label, choose_button):
     with Image.open(file_path) as img:
         # Calculer la nouvelle taille de l'image à 70% de la largeur et de la hauteur
@@ -128,68 +124,45 @@ def show_selected_image(file_path, default_label, img_label, choose_button):
         img_width = int(0.7 * window_width)
         img_height = int(0.7 * window_height)
         img = img.resize((img_width, img_height), Image.ANTIALIAS)
-
+        choose_button.destroy()
         photo = ImageTk.PhotoImage(img)
         img_label.config(image=photo, borderwidth=5, relief="groove")
         img_label.image = photo
         default_label.pack_forget()
-
         # Supprimer le bouton "Sélectionner une image"
-        choose_button.destroy()
-
         # Créer un nouveau cadre pour les boutons
         button_frame = Frame(root, bg='#FFFFFF')
-
         # Ajouter les boutons vert et rouge à droite de l'image
         green_button = Button(button_frame, text="Télécharger", bg="#4CAF50", fg="white",  width=10, command=lambda: save_image(file_path))
         green_button.pack(side="right", padx=100, pady=10)
-
-        red_button = Button(button_frame, text="Supprimer", bg="#EF5350", fg="white", width=7, padx=10, command=lambda: remove_image(default_label, img_label, choose_button, button_frame))
+        red_button = Button(button_frame, text="Autre Image", bg="#EF5350", fg="white", width=7, padx=10,  command=lambda: choose_image(default_label, img_label, choose_button, green_button, red_button, button_frame))
         red_button.pack(side="right", padx=100, pady=10)
-
         # Ajouter le cadre sous l'image au centre
         button_frame.pack(side="bottom", pady=20)
 
-def choose_image(default_label, img_label, choose_button):
+def choose_image(default_label, img_label, choose_button, green_button, red_button, button_frame):
+    green_button.destroy()
+    red_button.destroy()
+    button_frame.destroy()
     file_path = filedialog.askopenfilename(filetypes=[("Images", "*.png;*.jpg;*.jpeg")])
     if file_path:
         show_selected_image(file_path, default_label, img_label, choose_button)
         print("Vous avez sélectionné l'image", file_path)
 
-def reset_interface(default_label, img_label, choose_button):
-    default_label.config(text="Aucune image sélectionnée")
-    choose_button.pack(pady=15)
-
-def create_button_frame(default_label, img_label, choose_button):
-    global button_frame
-    # Supprimer la frame si elle existe déjà
-    if button_frame:
-        button_frame.destroy()
-
-    button_frame = Frame(root, bg='#FFFFFF')
-
-    # Ajouter les boutons vert et rouge à droite de l'image
-    green_button = Button(button_frame, text="Télécharger", bg="#4CAF50", fg="white",  width=10, command=lambda: save_image(file_path))
-    green_button.pack(side="right", padx=100, pady=10)
-
-    red_button = Button(button_frame, text="Supprimer", bg="#EF5350", fg="white", width=7, padx=10, command=lambda: remove_image(default_label, img_label, choose_button))
-    red_button.pack(side="right", padx=100, pady=10)
-
-    # Ajouter le cadre sous l'image au centre
-    button_frame.pack(side="bottom", pady=20)
-
-
 default_text = "Aucune image sélectionnée"
-default_label = Label(root, text=default_text, font=("Arial", 24), pady=50, padx=200)
+default_label = Label(root, text=default_text, font=("Arial", 24), pady=200, padx=150)
 default_label.pack()
 
 # Créer un cadre pour stocker le bouton
 button_frame = Frame(root, bg='#FFFFFF')
 img_label = Label(root, background='#FFFFFF')
 img_label.pack(pady=15)
-choose_button = Button(button_frame, text="Sélectionner une image", command=lambda: choose_image(default_label, img_label, choose_button), bg="#4C4C4C", fg="white")
+green_button = Button(button_frame, text="Télécharger", bg="#4CAF50", fg="white",  width=10, command=lambda: save_image(file_path))
+green_button.pack(side="right", padx=100, pady=10)
+red_button = Button(button_frame, text="Autre Image", bg="#EF5350", fg="white", width=7, padx=10,  command=lambda: choose_image(default_label, img_label, choose_button, green_button, red_button))
+red_button.pack(side="right", padx=100, pady=10)
+choose_button = Button(button_frame, text="Sélectionner une image", command=lambda: choose_image(default_label, img_label, choose_button, green_button, red_button,button_frame), bg="#4C4C4C", fg="white")
 choose_button.pack(pady=15)
 # Ajouter le cadre au-dessus du label
 button_frame.pack()
-
 root.mainloop()
