@@ -21,7 +21,6 @@ mlp_dll = ctypes.cdll.LoadLibrary(dll_path)
 mlp_dll.saveModel.argtypes = [ctypes.c_void_p]
 mlp_dll.loadModel.restype = ctypes.c_void_p
 
-
 loaded_mlp_ptr = mlp_dll.loadModel()
 current_dir = os.path.dirname(os.path.abspath(__file__))
 data_dir = os.path.join(current_dir, "Application", "imageAtest")
@@ -87,6 +86,7 @@ def save_image(file_path):
             elif predicted_class == 2:      
                 cls = "Ballon de basket"
         print(cls)
+        result_label.config(text=cls)  # Mettre à jour le texte du label avec le résultat de la prédiction
         for the_file in os.listdir(destination_folder):
             file_path = os.path.join(destination_folder, the_file)
         try:
@@ -94,7 +94,7 @@ def save_image(file_path):
                 os.unlink(file_path)
         except Exception as e:
             print(e)
-print(data_dir)
+    print(data_dir)
 
 def allcolors(directory):
     all_pixels = []
@@ -161,8 +161,13 @@ green_button = Button(button_frame, text="Télécharger", bg="#4CAF50", fg="whit
 green_button.pack(side="right", padx=100, pady=10)
 red_button = Button(button_frame, text="Autre Image", bg="#EF5350", fg="white", width=7, padx=10,  command=lambda: choose_image(default_label, img_label, choose_button, green_button, red_button))
 red_button.pack(side="right", padx=100, pady=10)
-choose_button = Button(button_frame, text="Sélectionner une image", command=lambda: choose_image(default_label, img_label, choose_button, green_button, red_button,button_frame), bg="#4C4C4C", fg="white")
+choose_button = Button(button_frame, text="Sélectionner une image", command=lambda: choose_image(default_label, img_label, choose_button, green_button, red_button, button_frame), bg="#4C4C4C", fg="white")
 choose_button.pack(pady=15)
 # Ajouter le cadre au-dessus du label
 button_frame.pack()
+
+# Ajouter un label pour afficher le résultat de la prédiction
+result_label = Label(root, text="", font=("Arial", 18), pady=20)
+result_label.pack()
+
 root.mainloop()
