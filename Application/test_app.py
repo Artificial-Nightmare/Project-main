@@ -23,7 +23,8 @@ mlp_dll.loadModel.restype = ctypes.c_void_p
 
 loaded_mlp_ptr = mlp_dll.loadModel()
 current_dir = os.path.dirname(os.path.abspath(__file__))
-data_dir = os.path.join(current_dir, 'imageAtest')
+data_dir = os.path.join(current_dir, "Application", "imageAtest")
+print(data_dir)
 
 root = Tk()
 
@@ -57,7 +58,7 @@ else:
     print(f"Attention : impossible de trouver {icon_path}.")
 
 def save_image(file_path):
-    destination_folder = filedialog.askdirectory()
+    destination_folder = os.path.join(os.getcwd(),"Application" ,"imageAtest")
 
     if destination_folder:
         # Vérifier si le dossier existe et le créer s'il n'existe pas
