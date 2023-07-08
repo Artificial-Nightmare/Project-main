@@ -37,6 +37,7 @@ dll.rosenblatt(X, Y, X.shape[0], X.shape[1], learning_rate, max_iterations, w)
 plt.scatter(X[0:50, 0], X[0:50, 1], color='blue')
 plt.scatter(X[50:100,0], X[50:100,1], color='red') 
 # Affichage de la droite de séparation
+print(w)
 x = np.linspace(-2, 2, 100)
 y = -(w[0] * x + w[2]) / w[1]
 plt.plot(x, y, color='black')
