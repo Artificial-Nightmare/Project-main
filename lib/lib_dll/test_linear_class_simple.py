@@ -20,8 +20,16 @@ dll.rosenblatt.argtypes = [np.ctypeslib.ndpointer(dtype=np.double, ndim=2, flags
 
 # Exemple d'utilisation
 # pas oublier de mettre le dtype=np.float64 !
-X = np.concatenate([np.random.random((50,2)) * 1 + np.array([1, 1]), np.random.random((50,2)) * 1 + np.array([2, 2])], dtype=np.float64)
-Y = np.concatenate([np.ones((50, 1)), np.ones((50, 1)) * -1.0], dtype=np.float64).flatten()
+X = np.array([
+      [1, 1],
+      [2, 3],
+      [3, 3]
+], dtype=np.float64)
+Y = np.array([
+      1,
+      -1,
+      -1
+],dtype=np.float64).flatten()
 learning_rate = 0.1
 max_iterations = 100
 # Centrage et réduction des données
@@ -34,10 +42,10 @@ w = np.zeros(X.shape[1] + 1, dtype=np.float64)
 dll.rosenblatt(X, Y, X.shape[0], X.shape[1], learning_rate, max_iterations, w)
 
 # Affichage des données
-plt.scatter(X[0:50, 0], X[0:50, 1], color='blue')
-plt.scatter(X[50:100,0], X[50:100,1], color='red') 
+plt.scatter(X[0, 0], X[0, 1], color='blue')
+plt.scatter(X[1:3,0], X[1:3,1], color='red')
 # Affichage de la droite de séparation
-x = np.linspace(-2, 2, 100)
+x = np.linspace(2, -1, 5)
 y = -(w[0] * x + w[2]) / w[1]
 plt.plot(x, y, color='black')
 plt.show()
