@@ -30,7 +30,9 @@ mlp_dll.deleteMLP.argtypes = [ctypes.c_void_p]
 # Chargement des données d'entraînement et de test
 # Définition de la structure du MLP
 
-npl = np.array([1875,32,3], dtype=np.int32)
+npl = np.array([1875,2048,1024,512,3], dtype=np.int32)
+num_epochs = 10000
+learning_rate = 0.01045
 mlp_ptr = mlp_dll.createMLP(npl.ctypes.data_as(ctypes.POINTER(ctypes.c_int)), npl.size)
 
 data_dir = os.path.join(current_dir, '..', 'Test_image')
@@ -40,8 +42,7 @@ print(train_inputs.shape)
 # Entraînement du MLP sur un nombre spécifique d'époques
 samples_inputs = train_inputs
 samples_expected_outputs = train_expected_outputs
-num_epochs = 1000000
-learning_rate = 0.001545
+
 mlp_ptr = trainer.training(num_epochs, learning_rate,samples_inputs,samples_expected_outputs,mlp_ptr)
 
 

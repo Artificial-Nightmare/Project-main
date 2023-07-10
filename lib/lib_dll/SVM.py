@@ -35,7 +35,6 @@ svm_lib.predictSVM.restype = ctypes.c_int
 
 # Fonction pour entraîner le SVM avec l'algorithme du perceptron
 def trainSVM(trainingData, numIterations):
-    # Extraire les exemples d'entraînement et les labels
     features = trainingData[:, :-1].astype(np.float64)
     labels = trainingData[:, -1].astype(np.float64)
 
@@ -43,7 +42,6 @@ def trainSVM(trainingData, numIterations):
     weights = np.zeros(features.shape[1], dtype=np.float64)
     bias = ctypes.c_double(0.0)
 
-    # Appeler la fonction C++ pour entraîner le SVM
     svm_lib.trainSVM(features, features.shape[0], features.shape[1], weights, ctypes.byref(bias), numIterations)
 
     return weights, bias.value
@@ -54,7 +52,6 @@ def predictSVM(features, weights, bias):
     return svm_lib.predictSVM(np.array(features, dtype=np.float64), weights, bias, len(features))
 
 
-# Création des données d'entraînement pour un test difficile de classification linéaire
 trainingData = np.array([
      [1, 1,1],
       [2, 3,-1],

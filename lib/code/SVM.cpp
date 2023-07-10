@@ -60,42 +60,4 @@ int predictSVM(const double* features, const double* weights, double bias, size_
     return (prediction >= 0) ? 1 : -1;
 }
 
-int main() {
-    // Création des données d'entraînement pour un test difficile de classification linéaire
-    double trainingData[] = {
-        0, 0, -1,
-        0, 1, -1,
-        1, 0, -1,
-        1, 1, -1,
-        0.5, 0.5, 1,
-        1.5, 1.5, 1
-    };
-
-    size_t numExamples = 6;
-    size_t numFeatures = 2;
-
-    // Entraînement du SVM
-    double weights[numFeatures];
-    double bias;
-    int numIterations = 1000;
-
-    trainSVM(trainingData, numExamples, numFeatures, weights, bias, numIterations);
-
-    // Création des données de test
-    double testData[] = {
-        0.2, 0.2,
-        1.2, 1.2
-    };
-
-    size_t numTestExamples = 2;
-
-    // Affichage des prédictions pour les données de test
-    for (size_t i = 0; i < numTestExamples; i++) {
-        const double* features = testData + i * numFeatures;
-        int prediction = predictSVM(features, weights, bias, numFeatures);
-        std::cout << "Features: " << features[0] << ", " << features[1] << " => Output: " << prediction << std::endl;
-    }
-
-    return 0;
-}
 }
