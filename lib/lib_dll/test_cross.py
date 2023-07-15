@@ -32,7 +32,7 @@ mlp_dll.train(mlp_ptr,
                samples_inputs.ctypes.data_as(ctypes.POINTER(ctypes.c_double)),
                samples_expected_outputs.ctypes.data_as(ctypes.POINTER(ctypes.c_double)),
                samples_inputs.shape[0], samples_inputs.shape[1], 1,
-               True, 2000000, 0.1)
+               True, 2000000, 0.2)
 
 
 input_size = 2
