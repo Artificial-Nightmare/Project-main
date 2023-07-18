@@ -30,7 +30,7 @@ mlp_dll.deleteMLP.argtypes = [ctypes.c_void_p]
 # Chargement des données d'entraînement et de test
 # Définition de la structure du MLP
 
-npl = np.array([1875,2048,1024,512,3], dtype=np.int32)
+npl = np.array([1875,1200,500,3], dtype=np.int32)
 num_epochs = 10000
 learning_rate = 0.01045
 mlp_ptr = mlp_dll.createMLP(npl.ctypes.data_as(ctypes.POINTER(ctypes.c_int)), npl.size)
