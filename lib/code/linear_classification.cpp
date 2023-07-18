@@ -29,7 +29,7 @@ void rosenblatt(double *X_data, double *Y_data, int rows, int cols, double learn
         }
     }
 
-    // Entraînement du perceptron pendant max_iterations itérations
+    // Entraînement
     for (int iter = 0; iter < max_iterations; iter++)
     {
         std::vector<std::vector<double>> gradient(nb_class, std::vector<double>(cols + 1, 0.0));
@@ -60,7 +60,7 @@ void rosenblatt(double *X_data, double *Y_data, int rows, int cols, double learn
             }
         }
 
-        // Mise à jour des poids en utilisant la descente de gradient
+        // Mise à jour des poids avec gradient
         for (int i = 0; i < nb_class; i++)
         {
             for (int k = 0; k <= cols; k++)
@@ -70,7 +70,7 @@ void rosenblatt(double *X_data, double *Y_data, int rows, int cols, double learn
         }
     }
 
-    // Copie des poids w vers le tableau de sortie
+    // Copie des poids w pour python
     for (int i = 0; i < nb_class; i++)
     {
         for (int j = 0; j <= cols; j++)
