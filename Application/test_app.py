@@ -11,7 +11,7 @@ import sys
 
 root = Tk()
 current_dir = os.path.dirname(os.path.abspath(__file__))
-
+root.iconbitmap(os.path.join(current_dir, "icon.ico"))
 # Append the path to the DLL to the system's search path
 dll_path = os.path.join(current_dir, 'perceptron_multi_couche.dll')
 sys.path.append(dll_path)
