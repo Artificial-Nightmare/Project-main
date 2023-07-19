@@ -19,13 +19,13 @@ void rosenblatt(double *X_data, double *Y_data, int rows, int cols, double learn
         X[i * (cols + 1) + cols] = 1.0;
     }
 
-    // Initialisation des poids à zéro ou à des valeurs aléatoires
+    // Initialisation des poids à zéro
     std::vector<std::vector<double>> w_vec(nb_class, std::vector<double>(cols + 1));
     for (int i = 0; i < nb_class; i++)
     {
         for (int j = 0; j <= cols; j++)
         {
-            w_vec[i][j] = 0.0; // ou rand() / double(RAND_MAX) pour des valeurs aléatoires
+            w_vec[i][j] = 0.0; 
         }
     }
 
